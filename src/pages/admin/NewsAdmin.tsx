@@ -43,6 +43,7 @@ import { Pencil, Pin, PinOff, Plus, Search, Trash2, Upload, Loader2, Eye, EyeOff
 import { toast } from "sonner";
 import { slugify } from "@/lib/slugify";
 import { useAuth } from "@/contexts/AuthContext";
+import { RichTextEditor } from "@/components/editor/RichTextEditor";
 
 interface Category {
   id: string;
@@ -472,13 +473,12 @@ const NewsAdmin = () => {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="content">เนื้อหา *</Label>
-              <Textarea
-                id="content"
+              <Label>เนื้อหา *</Label>
+              <RichTextEditor
                 value={form.content}
-                onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
+                onChange={(html) => setForm((f) => ({ ...f, content: html }))}
                 placeholder="รายละเอียดของข่าว..."
-                rows={8}
+                uploadFolder={`content/${user?.id ?? "anon"}`}
               />
             </div>
 
