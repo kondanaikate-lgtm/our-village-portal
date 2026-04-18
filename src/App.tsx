@@ -11,6 +11,8 @@ import NotFound from "./pages/NotFound.tsx";
 import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/admin/Dashboard.tsx";
 import NewsAdmin from "./pages/admin/NewsAdmin.tsx";
+import PersonnelAdmin from "./pages/admin/PersonnelAdmin.tsx";
+import BannersAdmin from "./pages/admin/BannersAdmin.tsx";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,26 @@ const App = () => (
                 <ProtectedRoute requireAdmin>
                   <AdminLayout>
                     <NewsAdmin />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/personnel"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout>
+                    <PersonnelAdmin />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/banners"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminLayout>
+                    <BannersAdmin />
                   </AdminLayout>
                 </ProtectedRoute>
               }
