@@ -5,6 +5,7 @@ import { NewsSection } from "@/components/home/NewsSection";
 import { PersonnelSection } from "@/components/home/PersonnelSection";
 import { OtopSection } from "@/components/home/OtopSection";
 import { ContactQuickSection } from "@/components/home/ContactQuickSection";
+import { BannerPopup } from "@/components/home/BannerPopup";
 import { SITE_INFO } from "@/config/site";
 
 const Index = () => {
@@ -24,6 +25,7 @@ const Index = () => {
       <PersonnelSection />
       <OtopSection />
       <ContactQuickSection />
+      <BannerPopup />
     </SiteLayout>
   );
 };
