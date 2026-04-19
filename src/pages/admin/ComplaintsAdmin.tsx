@@ -112,13 +112,15 @@ const ComplaintsAdmin = () => {
     if (!active) return;
     setSaving(true);
     const isResolving = (draftStatus === "resolved" || draftStatus === "rejected");
-    const payload: Record<string, unknown> = {
-      status: draftStatus,
-      admin_note: draftNote.trim() || null,
-      resolved_by: isResolving ? user?.id ?? null : null,
-      resolved_at: isResolving ? new Date().toISOString() : null,
-    };
-    const { error } = await supabase.from("complaints").update(payload).eq("id", active.id);
+    const { error } = await supabase
+      .from("complaints")
+      .update({
+        status: draftStatus,
+        admin_note: draftNote.trim() || null,
+        resolved_by: isResolving ? user?.id ?? null : null,
+        resolved_at: isResolving ? new Date().toISOString() : null,
+      })
+      .eq("id", active.id);
     setSaving(false);
     if (error) return toast.error("บันทึกไม่สำเร็จ: " + error.message);
     toast.success("อัปเดตสถานะเรียบร้อย");

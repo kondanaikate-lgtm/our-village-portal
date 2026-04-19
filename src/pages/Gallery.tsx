@@ -85,7 +85,7 @@ const GalleryPage = () => {
           </Button>
           <SectionHeader
             title={active.title}
-            subtitle={active.event_date ? new Date(active.event_date).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" }) : undefined}
+            description={active.event_date ? new Date(active.event_date).toLocaleDateString("th-TH", { day: "2-digit", month: "long", year: "numeric" }) : undefined}
           />
           {active.description && <p className="mt-3 text-muted-foreground">{active.description}</p>}
           <div className="mt-6">
@@ -128,7 +128,7 @@ const GalleryPage = () => {
   return (
     <SiteLayout>
       <div className="container py-10">
-        <SectionHeader title="แกลเลอรี่ภาพกิจกรรม" subtitle="ภาพบรรยากาศกิจกรรมและงานต่างๆ ของหมู่บ้าน" />
+        <SectionHeader title="แกลเลอรี่ภาพกิจกรรม" description="ภาพบรรยากาศกิจกรรมและงานต่างๆ ของหมู่บ้าน" />
         <div className="mt-6">
           {loading ? (
             <div className="text-center py-16 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin inline mr-2" /> กำลังโหลด...</div>

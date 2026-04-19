@@ -87,7 +87,7 @@ const PublicDocuments = () => {
   return (
     <SiteLayout>
       <div className="container py-10">
-        <SectionHeader title="เอกสารดาวน์โหลด" subtitle="เอกสารราชการ แผนงาน รายงาน และแบบฟอร์มต่างๆ" />
+        <SectionHeader title="เอกสารดาวน์โหลด" description="เอกสารราชการ แผนงาน รายงาน และแบบฟอร์มต่างๆ" />
 
         <div className="mt-6 grid gap-3 sm:grid-cols-3 rounded-lg border border-border bg-card p-4">
           <div className="relative sm:col-span-1">
