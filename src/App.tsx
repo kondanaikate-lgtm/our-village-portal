@@ -14,12 +14,17 @@ import NewsDetail from "./pages/NewsDetail.tsx";
 import PersonnelPage from "./pages/PersonnelPage.tsx";
 import Faq from "./pages/Faq.tsx";
 import Complaints from "./pages/Complaints.tsx";
+import PublicDocuments from "./pages/PublicDocuments.tsx";
+import Gallery from "./pages/Gallery.tsx";
 import Dashboard from "./pages/admin/Dashboard.tsx";
 import NewsAdmin from "./pages/admin/NewsAdmin.tsx";
 import PersonnelAdmin from "./pages/admin/PersonnelAdmin.tsx";
 import BannersAdmin from "./pages/admin/BannersAdmin.tsx";
 import OtopAdmin from "./pages/admin/OtopAdmin.tsx";
 import DocumentsAdmin from "./pages/admin/DocumentsAdmin.tsx";
+import ComplaintsAdmin from "./pages/admin/ComplaintsAdmin.tsx";
+import FaqsAdmin from "./pages/admin/FaqsAdmin.tsx";
+import GalleryAdmin from "./pages/admin/GalleryAdmin.tsx";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +51,8 @@ const App = () => (
             <Route path="/about/personnel" element={<PersonnelPage />} />
             <Route path="/faq" element={<Faq />} />
             <Route path="/complaints" element={<Complaints />} />
+            <Route path="/services/documents" element={<PublicDocuments />} />
+            <Route path="/gallery" element={<Gallery />} />
 
             {/* Admin */}
             <Route path="/admin" element={wrapAdmin(<Dashboard />)} />
@@ -54,6 +61,9 @@ const App = () => (
             <Route path="/admin/banners" element={wrapAdmin(<BannersAdmin />)} />
             <Route path="/admin/otop" element={wrapAdmin(<OtopAdmin />)} />
             <Route path="/admin/documents" element={wrapAdmin(<DocumentsAdmin />)} />
+            <Route path="/admin/complaints" element={wrapAdmin(<ComplaintsAdmin />)} />
+            <Route path="/admin/faqs" element={wrapAdmin(<FaqsAdmin />)} />
+            <Route path="/admin/gallery" element={wrapAdmin(<GalleryAdmin />)} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
