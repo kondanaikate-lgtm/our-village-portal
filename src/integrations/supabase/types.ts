@@ -708,6 +708,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_document_download: {
+        Args: { _doc_id: string }
+        Returns: undefined
+      }
       increment_visitor: { Args: { _page_path?: string }; Returns: undefined }
       unsubscribe_by_token: { Args: { _token: string }; Returns: boolean }
     }
