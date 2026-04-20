@@ -16,6 +16,7 @@ import Faq from "./pages/Faq.tsx";
 import Complaints from "./pages/Complaints.tsx";
 import PublicDocuments from "./pages/PublicDocuments.tsx";
 import Gallery from "./pages/Gallery.tsx";
+import Events from "./pages/Events.tsx";
 import Dashboard from "./pages/admin/Dashboard.tsx";
 import NewsAdmin from "./pages/admin/NewsAdmin.tsx";
 import PersonnelAdmin from "./pages/admin/PersonnelAdmin.tsx";
@@ -25,6 +26,8 @@ import DocumentsAdmin from "./pages/admin/DocumentsAdmin.tsx";
 import ComplaintsAdmin from "./pages/admin/ComplaintsAdmin.tsx";
 import FaqsAdmin from "./pages/admin/FaqsAdmin.tsx";
 import GalleryAdmin from "./pages/admin/GalleryAdmin.tsx";
+import EventsAdmin from "./pages/admin/EventsAdmin.tsx";
+import SubscribersAdmin from "./pages/admin/SubscribersAdmin.tsx";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +56,7 @@ const App = () => (
             <Route path="/complaints" element={<Complaints />} />
             <Route path="/services/documents" element={<PublicDocuments />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/events" element={<Events />} />
 
             {/* Admin */}
             <Route path="/admin" element={wrapAdmin(<Dashboard />)} />
@@ -64,6 +68,8 @@ const App = () => (
             <Route path="/admin/complaints" element={wrapAdmin(<ComplaintsAdmin />)} />
             <Route path="/admin/faqs" element={wrapAdmin(<FaqsAdmin />)} />
             <Route path="/admin/gallery" element={wrapAdmin(<GalleryAdmin />)} />
+            <Route path="/admin/events" element={wrapAdmin(<EventsAdmin />)} />
+            <Route path="/admin/subscribers" element={wrapAdmin(<SubscribersAdmin />)} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
