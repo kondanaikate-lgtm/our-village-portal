@@ -76,12 +76,12 @@ export const SiteFooter = () => {
             </h4>
             <ul className="space-y-2 text-sm">
               {[
-                { label: "ข่าวประชาสัมพันธ์", href: "/news" },
-                { label: "ปฏิทินกิจกรรม", href: "/calendar" },
+              { label: "ข่าวประชาสัมพันธ์", href: "/news" },
+                { label: "ปฏิทินกิจกรรม", href: "/events" },
+                { label: "เอกสารดาวน์โหลด", href: "/services/documents" },
+                { label: "แกลเลอรี่ภาพ", href: "/gallery" },
                 { label: "ร้องเรียน / ร้องทุกข์", href: "/complaints" },
                 { label: "คำถามที่พบบ่อย", href: "/faq" },
-                { label: "ITA", href: "/ita" },
-                { label: "ติดต่อเรา", href: "/contact" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
