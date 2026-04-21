@@ -22,7 +22,7 @@ interface BannerSlide {
   link_url: string | null;
 }
 
-const HeroOverlay = () => (
+const HeroOverlay = ({ siteName }: { siteName: string }) => (
   <div className="container relative py-20 md:py-28 lg:py-36 pointer-events-none">
     <div className="max-w-3xl animate-fade-in-up">
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/40 backdrop-blur-sm mb-6">
@@ -32,7 +32,7 @@ const HeroOverlay = () => (
         </span>
       </div>
       <h1 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-primary-foreground leading-tight mb-4 text-balance">
-        {SITE_INFO.villageName}
+        {siteName}
       </h1>
       <p className="text-base md:text-lg lg:text-xl text-primary-foreground/90 mb-3 font-medium">
         {SITE_INFO.shortAddress}
@@ -150,7 +150,7 @@ export const HeroSection = () => {
         )}
       </div>
 
-      <HeroOverlay />
+      <HeroOverlay siteName={settings.siteName} />
 
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-gold" />
     </section>
