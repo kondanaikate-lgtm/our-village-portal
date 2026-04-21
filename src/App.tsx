@@ -15,6 +15,7 @@ import PersonnelPage from "./pages/PersonnelPage.tsx";
 import Faq from "./pages/Faq.tsx";
 import Complaints from "./pages/Complaints.tsx";
 import PublicDocuments from "./pages/PublicDocuments.tsx";
+import Otop from "./pages/Otop.tsx";
 import Gallery from "./pages/Gallery.tsx";
 import Events from "./pages/Events.tsx";
 import VillageInfoPage from "./pages/VillageInfoPage.tsx";
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/faq" element={<Faq />} />
             <Route path="/complaints" element={<Complaints />} />
             <Route path="/services/documents" element={<PublicDocuments />} />
+            <Route path="/services/otop" element={<Otop />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/events" element={<Events />} />
 

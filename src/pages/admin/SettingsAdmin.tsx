@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, Loader2, Pencil, Plus, Save, Settings, Trash2 } from "lucide-react";
+import { ExternalLink, Image as ImageIcon, Loader2, Pencil, Plus, Save, Settings, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -45,6 +46,12 @@ interface SocialRow {
   order_index: number;
 }
 
+interface SiteSettingsRow {
+  site_name: string;
+  logo_url: string | null;
+  hero_display_mode: "single" | "carousel";
+}
+
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
 
 const SettingsAdmin = () => {
@@ -56,12 +63,16 @@ const SettingsAdmin = () => {
   const [socials, setSocials] = useState<SocialRow[]>([]);
   const [socialOpen, setSocialOpen] = useState(false);
   const [socialForm, setSocialForm] = useState<(typeof emptySocial) & { id?: string }>(emptySocial);
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({ site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2", logo_url: null, hero_display_mode: "carousel" });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const [infoResult, socialResult] = await Promise.all([
+    const [infoResult, socialResult, settingsResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
+      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode").eq("key", "main").maybeSingle(),
     ]);
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
@@ -78,6 +89,7 @@ const SettingsAdmin = () => {
     });
     setInfos(next);
     setSocials((socialResult.data ?? []) as SocialRow[]);
+    if (settingsResult.data) setSiteSettings(settingsResult.data as SiteSettingsRow);
     setLoading(false);
   };
 
@@ -107,6 +119,35 @@ const SettingsAdmin = () => {
     if (error) return toast.error("บันทึกไม่สำเร็จ: " + error.message);
     if (data?.id) updateInfo({ id: data.id });
     toast.success("บันทึกเนื้อหาเรียบร้อย");
+  };
+
+  const uploadLogo = async (file: File) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return toast.error("ไฟล์ใหญ่เกิน 5MB");
+    setUploadingLogo(true);
+    const ext = file.name.split(".").pop() || "png";
+    const path = `logos/${user?.id ?? "admin"}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("site-assets").upload(path, file, { cacheControl: "3600", upsert: false });
+    setUploadingLogo(false);
+    if (error) return toast.error("อัปโหลดโลโก้ไม่สำเร็จ: " + error.message);
+    const { data } = supabase.storage.from("site-assets").getPublicUrl(path);
+    setSiteSettings((s) => ({ ...s, logo_url: data.publicUrl }));
+    toast.success("อัปโหลดโลโก้สำเร็จ");
+  };
+
+  const saveSiteSettings = async () => {
+    if (!siteSettings.site_name.trim()) return toast.error("กรุณากรอกชื่อเว็บไซต์");
+    setSavingSettings(true);
+    const { error } = await (supabase as any).from("site_settings").upsert({
+      key: "main",
+      site_name: siteSettings.site_name.trim(),
+      logo_url: siteSettings.logo_url,
+      hero_display_mode: siteSettings.hero_display_mode,
+      updated_by: user?.id ?? null,
+    });
+    setSavingSettings(false);
+    if (error) return toast.error("บันทึกการตั้งค่าไม่สำเร็จ: " + error.message);
+    toast.success("บันทึกการตั้งค่าเว็บไซต์เรียบร้อย");
   };
 
   const openSocial = (row?: SocialRow) => {
@@ -162,8 +203,27 @@ const SettingsAdmin = () => {
       {loading ? (
         <div className="py-16 text-center text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin inline mr-2" />กำลังโหลด...</div>
       ) : (
-        <Tabs defaultValue="info" className="space-y-4">
-          <TabsList><TabsTrigger value="info">เนื้อหาเว็บไซต์</TabsTrigger><TabsTrigger value="social">Social Links</TabsTrigger></TabsList>
+        <Tabs defaultValue="site" className="space-y-4">
+          <TabsList><TabsTrigger value="site">ตั้งค่าหลัก</TabsTrigger><TabsTrigger value="info">เนื้อหาเว็บไซต์</TabsTrigger><TabsTrigger value="social">Social Links</TabsTrigger></TabsList>
+          <TabsContent value="site" className="space-y-4">
+            <Card className="p-4 md:p-5 space-y-5">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5"><Label>ชื่อเว็บไซต์</Label><Input value={siteSettings.site_name} onChange={(e) => setSiteSettings((s) => ({ ...s, site_name: e.target.value }))} /></div>
+                <div className="space-y-1.5"><Label>รูปแบบแบนเนอร์พื้นหลัง</Label><Select value={siteSettings.hero_display_mode} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_display_mode: v as "single" | "carousel" }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="single">ค้างรูปเดียว</SelectItem><SelectItem value="carousel">เปลี่ยนรูปไปเรื่อย ๆ</SelectItem></SelectContent></Select></div>
+              </div>
+              <div className="space-y-2">
+                <Label>โลโก้เว็บไซต์</Label>
+                <div className="flex flex-wrap items-center gap-3">
+                  {siteSettings.logo_url ? <img src={siteSettings.logo_url} alt="โลโก้เว็บไซต์" className="h-20 w-20 rounded-full object-cover border border-border" /> : <div className="h-20 w-20 rounded-full border border-dashed border-border bg-muted/40 flex items-center justify-center"><ImageIcon className="h-6 w-6 text-muted-foreground" /></div>}
+                  <Input type="file" accept="image/*" disabled={uploadingLogo} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ""; }} className="max-w-xs" />
+                  {siteSettings.logo_url && <Button type="button" variant="outline" size="sm" onClick={() => setSiteSettings((s) => ({ ...s, logo_url: null }))}>ลบโลโก้</Button>}
+                  {uploadingLogo && <span className="inline-flex items-center text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin mr-1" /> กำลังอัปโหลด</span>}
+                </div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1"><Upload className="h-3 w-3" /> รองรับไฟล์รูปภาพทั่วไป แนะนำ PNG/JPG</p>
+              </div>
+              <div className="flex justify-end"><Button variant="royal" onClick={saveSiteSettings} disabled={savingSettings || uploadingLogo}>{savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} บันทึกการตั้งค่า</Button></div>
+            </Card>
+          </TabsContent>
           <TabsContent value="info" className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
               <Card className="p-2 h-fit">

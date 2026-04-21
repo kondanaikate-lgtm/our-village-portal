@@ -3,7 +3,6 @@ import { Facebook, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_INFO } from "@/config/site";
 
@@ -66,7 +65,6 @@ const Contact = () => {
           </div>
 
           <div className="space-y-4">
-            <NewsletterSignup source="contact" />
             {links.length > 0 && (
               <Card className="p-6 border-border/60">
                 <h2 className="font-display font-semibold text-xl mb-4">ช่องทางออนไลน์</h2>

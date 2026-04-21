@@ -11,7 +11,6 @@ import {
   Calendar,
   Package,
   HelpCircle,
-  Mail,
   Settings,
   LogOut,
   Menu,
@@ -34,7 +33,6 @@ const NAV = [
   { to: "/admin/otop", label: "สินค้า OTOP", icon: Package },
   { to: "/admin/complaints", label: "ร้องเรียน", icon: MessageSquareWarning },
   { to: "/admin/faqs", label: "คำถามที่พบบ่อย", icon: HelpCircle },
-  { to: "/admin/subscribers", label: "ผู้รับข่าวสาร", icon: Mail },
   { to: "/admin/settings", label: "ตั้งค่าเว็บไซต์", icon: Settings },
 ];
 

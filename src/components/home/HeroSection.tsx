@@ -13,6 +13,7 @@ import { SITE_INFO } from "@/config/site";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-village.jpg";
 import { cn } from "@/lib/utils";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 interface BannerSlide {
   id: string;
@@ -21,7 +22,7 @@ interface BannerSlide {
   link_url: string | null;
 }
 
-const HeroOverlay = () => (
+const HeroOverlay = ({ siteName }: { siteName: string }) => (
   <div className="container relative py-20 md:py-28 lg:py-36 pointer-events-none">
     <div className="max-w-3xl animate-fade-in-up">
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/40 backdrop-blur-sm mb-6">
@@ -31,7 +32,7 @@ const HeroOverlay = () => (
         </span>
       </div>
       <h1 className="font-display font-bold text-4xl md:text-5xl lg:text-6xl text-primary-foreground leading-tight mb-4 text-balance">
-        {SITE_INFO.villageName}
+        {siteName}
       </h1>
       <p className="text-base md:text-lg lg:text-xl text-primary-foreground/90 mb-3 font-medium">
         {SITE_INFO.shortAddress}
@@ -47,7 +48,7 @@ const HeroOverlay = () => (
           </Link>
         </Button>
         <Button asChild size="xl" variant="outlineGold">
-          <Link to="/services">บริการประชาชน</Link>
+          <Link to="/services/documents">บริการประชาชน</Link>
         </Button>
       </div>
     </div>
@@ -58,6 +59,7 @@ export const HeroSection = () => {
   const [slides, setSlides] = useState<BannerSlide[]>([]);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const { settings } = useSiteSettings();
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -89,18 +91,19 @@ export const HeroSection = () => {
     slides.length > 0
       ? slides.map((s) => ({ src: s.image_url, alt: s.title ?? "banner", href: s.link_url }))
       : [{ src: heroImage, alt: "ภาพมุมสูงหมู่บ้านแซร์ออ" }];
+  const displayVisuals = settings.heroDisplayMode === "single" ? visuals.slice(0, 1) : visuals;
 
   return (
     <section className="relative isolate overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        {visuals.length === 1 ? (
+        {displayVisuals.length === 1 ? (
           <>
-            {visuals[0].href ? (
-              <a href={visuals[0].href} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
-                <img src={visuals[0].src} alt={visuals[0].alt} className="h-full w-full object-cover" />
+            {displayVisuals[0].href ? (
+              <a href={displayVisuals[0].href} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
+                <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className="h-full w-full object-cover" />
               </a>
             ) : (
-              <img src={visuals[0].src} alt={visuals[0].alt} className="h-full w-full object-cover" />
+              <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className="h-full w-full object-cover" />
             )}
             <div className="absolute inset-0 bg-gradient-hero" />
           </>
@@ -113,7 +116,7 @@ export const HeroSection = () => {
               className="h-full w-full"
             >
               <CarouselContent className="h-full ml-0">
-                {visuals.map((v, i) => (
+                {displayVisuals.map((v, i) => (
                   <CarouselItem key={i} className="pl-0 basis-full">
                     <div className="relative h-full w-full min-h-[480px] md:min-h-[560px] lg:min-h-[640px]">
                       {v.href ? (
@@ -131,7 +134,7 @@ export const HeroSection = () => {
             <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
             {/* Dots */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-              {visuals.map((_, i) => (
+              {displayVisuals.map((_, i) => (
                 <button
                   key={i}
                   aria-label={`สไลด์ที่ ${i + 1}`}
@@ -147,7 +150,7 @@ export const HeroSection = () => {
         )}
       </div>
 
-      <HeroOverlay />
+      <HeroOverlay siteName={settings.siteName} />
 
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-gold" />
     </section>

@@ -180,7 +180,7 @@ const BannersAdmin = () => {
 
   const handleUpload = async (file: File) => {
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) return toast.error("ไฟล์ใหญ่เกิน 5MB");
+    if (file.size > 15 * 1024 * 1024) return toast.error("ไฟล์ใหญ่เกิน 15MB");
     setUploading(true);
     const ext = file.name.split(".").pop() || "jpg";
     const path = `banners/${user?.id ?? "anon"}/${Date.now()}.${ext}`;
@@ -492,7 +492,7 @@ const BannersAdmin = () => {
               <div className="flex items-center gap-2">
                 <Input
                   type="file"
-                  accept="image/*"
+                  accept="image/*,.gif"
                   disabled={uploading}
                   onChange={(e) => {
                     const f = e.target.files?.[0];
@@ -508,7 +508,7 @@ const BannersAdmin = () => {
                 )}
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Upload className="h-3 w-3" /> แนะนำสัดส่วน 16:9 ไฟล์ไม่เกิน 5MB
+                <Upload className="h-3 w-3" /> แนะนำสัดส่วน 16:9 รองรับ GIF ไฟล์ไม่เกิน 15MB
               </p>
             </div>
 

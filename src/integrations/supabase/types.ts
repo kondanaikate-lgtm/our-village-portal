@@ -552,6 +552,33 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          hero_display_mode: string
+          key: string
+          logo_url: string | null
+          site_name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          hero_display_mode?: string
+          key?: string
+          logo_url?: string | null
+          site_name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          hero_display_mode?: string
+          key?: string
+          logo_url?: string | null
+          site_name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       site_visitors: {
         Row: {
           created_at: string
