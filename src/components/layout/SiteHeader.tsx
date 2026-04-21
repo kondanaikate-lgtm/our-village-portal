@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, Phone, ChevronDown, LogIn } from "lucide-react";
+import { Menu, Phone, ChevronDown, LogIn, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +23,14 @@ import {
 } from "@/components/ui/accordion";
 import { NAV_ITEMS, SITE_INFO } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export const SiteHeader = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { user, isAdmin } = useAuth();
+  const { settings } = useSiteSettings();
 
   const isActive = (href: string) =>
     location.pathname === href || location.pathname.startsWith(href + "/");
@@ -37,7 +41,7 @@ export const SiteHeader = () => {
       <div className="bg-primary-deep text-primary-foreground/90 text-xs">
         <div className="container flex h-9 items-center justify-between">
           <div className="hidden sm:block">
-            ยินดีต้อนรับสู่เว็บไซต์ {SITE_INFO.villageName}
+            ยินดีต้อนรับสู่เว็บไซต์ {settings.siteName}
           </div>
           <a
             href={`tel:${SITE_INFO.headman.phoneRaw}`}
@@ -54,14 +58,16 @@ export const SiteHeader = () => {
         <div className="container flex h-16 lg:h-20 items-center justify-between gap-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group min-w-0">
-            <div className="relative h-11 w-11 lg:h-14 lg:w-14 rounded-full bg-gradient-primary flex items-center justify-center shadow-md ring-2 ring-accent/30 shrink-0">
-              <span className="font-display font-bold text-accent text-lg lg:text-2xl">
-                ๒
-              </span>
-            </div>
+            {settings.logoUrl ? (
+              <img src={settings.logoUrl} alt={settings.siteName} className="h-11 w-11 lg:h-14 lg:w-14 rounded-full object-cover bg-secondary shadow-md ring-2 ring-accent/30 shrink-0" />
+            ) : (
+              <div className="relative h-11 w-11 lg:h-14 lg:w-14 rounded-full bg-gradient-primary flex items-center justify-center shadow-md ring-2 ring-accent/30 shrink-0">
+                <span className="font-display font-bold text-accent text-lg lg:text-2xl">๒</span>
+              </div>
+            )}
             <div className="min-w-0">
               <div className="font-display font-bold text-sm lg:text-lg leading-tight text-foreground truncate">
-                {SITE_INFO.villageName}
+                {settings.siteName}
               </div>
               <div className="text-[10px] lg:text-xs text-muted-foreground truncate">
                 {SITE_INFO.shortAddress}
@@ -122,9 +128,9 @@ export const SiteHeader = () => {
               variant="royal"
               className="hidden md:inline-flex"
             >
-              <Link to="/auth">
-                <LogIn className="h-4 w-4" />
-                เข้าสู่ระบบ
+              <Link to={user && isAdmin ? "/admin" : "/auth"}>
+                {user && isAdmin ? <ShieldCheck className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+                {user && isAdmin ? "แผงจัดการ" : "เข้าสู่ระบบ"}
               </Link>
             </Button>
 
@@ -183,9 +189,9 @@ export const SiteHeader = () => {
 
                   <div className="px-4 py-4 mt-2">
                     <Button asChild variant="royal" className="w-full">
-                      <Link to="/auth" onClick={() => setOpen(false)}>
-                        <LogIn className="h-4 w-4" />
-                        เข้าสู่ระบบ
+                      <Link to={user && isAdmin ? "/admin" : "/auth"} onClick={() => setOpen(false)}>
+                        {user && isAdmin ? <ShieldCheck className="h-4 w-4" /> : <LogIn className="h-4 w-4" />}
+                        {user && isAdmin ? "แผงจัดการ" : "เข้าสู่ระบบ"}
                       </Link>
                     </Button>
                   </div>
