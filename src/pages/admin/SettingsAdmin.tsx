@@ -203,8 +203,27 @@ const SettingsAdmin = () => {
       {loading ? (
         <div className="py-16 text-center text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin inline mr-2" />กำลังโหลด...</div>
       ) : (
-        <Tabs defaultValue="info" className="space-y-4">
-          <TabsList><TabsTrigger value="info">เนื้อหาเว็บไซต์</TabsTrigger><TabsTrigger value="social">Social Links</TabsTrigger></TabsList>
+        <Tabs defaultValue="site" className="space-y-4">
+          <TabsList><TabsTrigger value="site">ตั้งค่าหลัก</TabsTrigger><TabsTrigger value="info">เนื้อหาเว็บไซต์</TabsTrigger><TabsTrigger value="social">Social Links</TabsTrigger></TabsList>
+          <TabsContent value="site" className="space-y-4">
+            <Card className="p-4 md:p-5 space-y-5">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5"><Label>ชื่อเว็บไซต์</Label><Input value={siteSettings.site_name} onChange={(e) => setSiteSettings((s) => ({ ...s, site_name: e.target.value }))} /></div>
+                <div className="space-y-1.5"><Label>รูปแบบแบนเนอร์พื้นหลัง</Label><Select value={siteSettings.hero_display_mode} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_display_mode: v as "single" | "carousel" }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="single">ค้างรูปเดียว</SelectItem><SelectItem value="carousel">เปลี่ยนรูปไปเรื่อย ๆ</SelectItem></SelectContent></Select></div>
+              </div>
+              <div className="space-y-2">
+                <Label>โลโก้เว็บไซต์</Label>
+                <div className="flex flex-wrap items-center gap-3">
+                  {siteSettings.logo_url ? <img src={siteSettings.logo_url} alt="โลโก้เว็บไซต์" className="h-20 w-20 rounded-full object-cover border border-border" /> : <div className="h-20 w-20 rounded-full border border-dashed border-border bg-muted/40 flex items-center justify-center"><ImageIcon className="h-6 w-6 text-muted-foreground" /></div>}
+                  <Input type="file" accept="image/*" disabled={uploadingLogo} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadLogo(f); e.target.value = ""; }} className="max-w-xs" />
+                  {siteSettings.logo_url && <Button type="button" variant="outline" size="sm" onClick={() => setSiteSettings((s) => ({ ...s, logo_url: null }))}>ลบโลโก้</Button>}
+                  {uploadingLogo && <span className="inline-flex items-center text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin mr-1" /> กำลังอัปโหลด</span>}
+                </div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1"><Upload className="h-3 w-3" /> รองรับไฟล์รูปภาพทั่วไป แนะนำ PNG/JPG</p>
+              </div>
+              <div className="flex justify-end"><Button variant="royal" onClick={saveSiteSettings} disabled={savingSettings || uploadingLogo}>{savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} บันทึกการตั้งค่า</Button></div>
+            </Card>
+          </TabsContent>
           <TabsContent value="info" className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
               <Card className="p-2 h-fit">
