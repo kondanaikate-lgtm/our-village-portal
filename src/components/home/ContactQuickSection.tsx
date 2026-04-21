@@ -13,15 +13,15 @@ const QUICK_LINKS = [
   },
   {
     icon: FileText,
-    title: "แบบฟอร์มดาวน์โหลด",
+    title: "เอกสารดาวน์โหลด",
     description: "เอกสารคำร้องและหนังสือต่างๆ",
-    href: "/services/forms",
+    href: "/services/documents",
   },
   {
     icon: Calendar,
     title: "ปฏิทินกิจกรรม",
     description: "ดูกิจกรรมและงานสำคัญของหมู่บ้าน",
-    href: "/calendar",
+    href: "/events",
   },
   {
     icon: HelpCircle,

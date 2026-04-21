@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Facebook, MessageCircle } from "lucide-react";
 import { SITE_INFO } from "@/config/site";
-import { NewsletterSignup } from "@/components/home/NewsletterSignup";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 export const SiteFooter = () => {
   const year = new Date().getFullYear() + 543;
+  const { settings } = useSiteSettings();
 
   return (
     <footer className="bg-primary-deep text-primary-foreground mt-16 ribbon-gold">
@@ -13,14 +14,16 @@ export const SiteFooter = () => {
           {/* Column 1: ข้อมูลหมู่บ้าน */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold">
-                <span className="font-display font-bold text-accent-foreground text-xl">
-                  ๒
-                </span>
-              </div>
+              {settings.logoUrl ? (
+                <img src={settings.logoUrl} alt={settings.siteName} className="h-12 w-12 rounded-full object-cover bg-primary-foreground shadow-gold" />
+              ) : (
+                <div className="h-12 w-12 rounded-full bg-gradient-gold flex items-center justify-center shadow-gold">
+                  <span className="font-display font-bold text-accent-foreground text-xl">๒</span>
+                </div>
+              )}
               <div>
                 <h3 className="font-display font-bold text-lg text-accent">
-                  {SITE_INFO.villageName}
+                  {settings.siteName}
                 </h3>
                 <p className="text-xs text-primary-foreground/70">
                   Saeo Village Moo 2
@@ -97,10 +100,6 @@ export const SiteFooter = () => {
           </div>
         </div>
 
-        <div className="mt-10 max-w-3xl">
-          <NewsletterSignup compact source="footer" />
-        </div>
-
         {/* Social */}
         <div className="mt-10 pt-8 border-t border-primary-foreground/15 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -130,7 +129,7 @@ export const SiteFooter = () => {
             </a>
           </div>
           <p className="text-xs text-primary-foreground/60 text-center sm:text-right">
-            © {year} {SITE_INFO.villageName}. สงวนลิขสิทธิ์.
+            © {year} {settings.siteName}. สงวนลิขสิทธิ์.
           </p>
         </div>
       </div>
