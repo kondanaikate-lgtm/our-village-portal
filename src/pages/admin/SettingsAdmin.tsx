@@ -69,7 +69,7 @@ const SettingsAdmin = () => {
 
   const load = async () => {
     setLoading(true);
-    const [infoResult, socialResult] = await Promise.all([
+    const [infoResult, socialResult, settingsResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
       (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode").eq("key", "main").maybeSingle(),
@@ -89,7 +89,7 @@ const SettingsAdmin = () => {
     });
     setInfos(next);
     setSocials((socialResult.data ?? []) as SocialRow[]);
-    if (arguments[0]) void 0;
+    if (settingsResult.data) setSiteSettings(settingsResult.data as SiteSettingsRow);
     setLoading(false);
   };
 
@@ -119,6 +119,35 @@ const SettingsAdmin = () => {
     if (error) return toast.error("บันทึกไม่สำเร็จ: " + error.message);
     if (data?.id) updateInfo({ id: data.id });
     toast.success("บันทึกเนื้อหาเรียบร้อย");
+  };
+
+  const uploadLogo = async (file: File) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return toast.error("ไฟล์ใหญ่เกิน 5MB");
+    setUploadingLogo(true);
+    const ext = file.name.split(".").pop() || "png";
+    const path = `logos/${user?.id ?? "admin"}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("site-assets").upload(path, file, { cacheControl: "3600", upsert: false });
+    setUploadingLogo(false);
+    if (error) return toast.error("อัปโหลดโลโก้ไม่สำเร็จ: " + error.message);
+    const { data } = supabase.storage.from("site-assets").getPublicUrl(path);
+    setSiteSettings((s) => ({ ...s, logo_url: data.publicUrl }));
+    toast.success("อัปโหลดโลโก้สำเร็จ");
+  };
+
+  const saveSiteSettings = async () => {
+    if (!siteSettings.site_name.trim()) return toast.error("กรุณากรอกชื่อเว็บไซต์");
+    setSavingSettings(true);
+    const { error } = await (supabase as any).from("site_settings").upsert({
+      key: "main",
+      site_name: siteSettings.site_name.trim(),
+      logo_url: siteSettings.logo_url,
+      hero_display_mode: siteSettings.hero_display_mode,
+      updated_by: user?.id ?? null,
+    });
+    setSavingSettings(false);
+    if (error) return toast.error("บันทึกการตั้งค่าไม่สำเร็จ: " + error.message);
+    toast.success("บันทึกการตั้งค่าเว็บไซต์เรียบร้อย");
   };
 
   const openSocial = (row?: SocialRow) => {
