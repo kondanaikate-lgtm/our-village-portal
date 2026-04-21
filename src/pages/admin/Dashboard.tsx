@@ -9,7 +9,6 @@ import {
   FileText,
   MessageSquareWarning,
   Image as ImageIcon,
-  Mail,
   Eye,
   Package,
   Calendar,
@@ -57,7 +56,6 @@ const Dashboard = () => {
         albums,
         otop,
         events,
-        subs,
         visitorsToday,
         visitorsMonth,
         topDocsRes,
@@ -96,10 +94,6 @@ const Dashboard = () => {
           .from("events")
           .select("*", { count: "exact", head: true })
           .gte("start_at", new Date().toISOString()),
-        supabase
-          .from("subscribers")
-          .select("*", { count: "exact", head: true })
-          .eq("is_active", true),
         supabase
           .from("site_visitors")
           .select("visit_count")
@@ -183,13 +177,6 @@ const Dashboard = () => {
           icon: Calendar,
           color: "bg-secondary text-secondary-foreground",
           to: "/admin/events",
-        },
-        {
-          label: "ผู้รับข่าวสาร",
-          value: subs.count ?? 0,
-          icon: Mail,
-          color: "bg-primary/10 text-primary",
-          to: "/admin/subscribers",
         },
       ]);
     };

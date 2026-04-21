@@ -48,7 +48,7 @@ const HeroOverlay = ({ siteName }: { siteName: string }) => (
           </Link>
         </Button>
         <Button asChild size="xl" variant="outlineGold">
-          <Link to="/services">บริการประชาชน</Link>
+          <Link to="/services/documents">บริการประชาชน</Link>
         </Button>
       </div>
     </div>
