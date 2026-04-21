@@ -17,6 +17,8 @@ import Complaints from "./pages/Complaints.tsx";
 import PublicDocuments from "./pages/PublicDocuments.tsx";
 import Gallery from "./pages/Gallery.tsx";
 import Events from "./pages/Events.tsx";
+import VillageInfoPage from "./pages/VillageInfoPage.tsx";
+import Contact from "./pages/Contact.tsx";
 import Dashboard from "./pages/admin/Dashboard.tsx";
 import NewsAdmin from "./pages/admin/NewsAdmin.tsx";
 import PersonnelAdmin from "./pages/admin/PersonnelAdmin.tsx";
@@ -28,6 +30,7 @@ import FaqsAdmin from "./pages/admin/FaqsAdmin.tsx";
 import GalleryAdmin from "./pages/admin/GalleryAdmin.tsx";
 import EventsAdmin from "./pages/admin/EventsAdmin.tsx";
 import SubscribersAdmin from "./pages/admin/SubscribersAdmin.tsx";
+import SettingsAdmin from "./pages/admin/SettingsAdmin.tsx";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +55,19 @@ const App = () => (
             <Route path="/news" element={<News />} />
             <Route path="/news/:slug" element={<NewsDetail />} />
             <Route path="/about/personnel" element={<PersonnelPage />} />
+            <Route path="/about/history" element={<VillageInfoPage />} />
+            <Route path="/about/vision" element={<VillageInfoPage />} />
+            <Route path="/about/structure" element={<VillageInfoPage />} />
+            <Route path="/about/authority" element={<VillageInfoPage />} />
+            <Route path="/transparency" element={<VillageInfoPage />} />
+            <Route path="/transparency/plans" element={<VillageInfoPage />} />
+            <Route path="/transparency/budget" element={<VillageInfoPage />} />
+            <Route path="/transparency/reports" element={<VillageInfoPage />} />
+            <Route path="/ita" element={<VillageInfoPage />} />
+            <Route path="/info-center" element={<VillageInfoPage />} />
+            <Route path="/policy" element={<VillageInfoPage />} />
+            <Route path="/manual" element={<VillageInfoPage />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<Faq />} />
             <Route path="/complaints" element={<Complaints />} />
             <Route path="/services/documents" element={<PublicDocuments />} />
@@ -70,6 +86,7 @@ const App = () => (
             <Route path="/admin/gallery" element={wrapAdmin(<GalleryAdmin />)} />
             <Route path="/admin/events" element={wrapAdmin(<EventsAdmin />)} />
             <Route path="/admin/subscribers" element={wrapAdmin(<SubscribersAdmin />)} />
+            <Route path="/admin/settings" element={wrapAdmin(<SettingsAdmin />)} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

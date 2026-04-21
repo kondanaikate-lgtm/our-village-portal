@@ -117,19 +117,7 @@ const SubscribersAdmin = () => {
       toast.error("กรุณากรอกหัวข้อและเนื้อหา");
       return;
     }
-    setSending(true);
-    const { data, error } = await supabase.functions.invoke("send-newsletter", {
-      body: { subject, body },
-    });
-    setSending(false);
-    if (error) {
-      toast.error(error.message || "ส่งล้มเหลว");
-      return;
-    }
-    toast.success(`ส่งสำเร็จ ${data?.sent ?? 0} ฉบับ`);
-    setOpenSend(false);
-    setSubject("");
-    setBody("");
+    toast.error("ยังไม่เปิดใช้การส่งอีเมลแบบกลุ่มผ่านระบบนี้ กรุณาใช้ Export CSV กับบริการอีเมลการตลาดโดยเฉพาะ");
   };
 
   return (
