@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, Loader2, Pencil, Plus, Save, Settings, Trash2 } from "lucide-react";
+import { ExternalLink, Image as ImageIcon, Loader2, Pencil, Plus, Save, Settings, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -45,6 +46,12 @@ interface SocialRow {
   order_index: number;
 }
 
+interface SiteSettingsRow {
+  site_name: string;
+  logo_url: string | null;
+  hero_display_mode: "single" | "carousel";
+}
+
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
 
 const SettingsAdmin = () => {
@@ -56,12 +63,16 @@ const SettingsAdmin = () => {
   const [socials, setSocials] = useState<SocialRow[]>([]);
   const [socialOpen, setSocialOpen] = useState(false);
   const [socialForm, setSocialForm] = useState<(typeof emptySocial) & { id?: string }>(emptySocial);
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({ site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2", logo_url: null, hero_display_mode: "carousel" });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const [infoResult, socialResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
+      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode").eq("key", "main").maybeSingle(),
     ]);
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
@@ -78,6 +89,7 @@ const SettingsAdmin = () => {
     });
     setInfos(next);
     setSocials((socialResult.data ?? []) as SocialRow[]);
+    if (arguments[0]) void 0;
     setLoading(false);
   };
 
