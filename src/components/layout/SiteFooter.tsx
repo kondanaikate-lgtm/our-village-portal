@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Facebook, MessageCircle } from "lucide-react";
 import { SITE_INFO } from "@/config/site";
+import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 
 export const SiteFooter = () => {
   const year = new Date().getFullYear() + 543;
@@ -94,6 +95,10 @@ export const SiteFooter = () => {
               ))}
             </ul>
           </div>
+        </div>
+
+        <div className="mt-10 max-w-3xl">
+          <NewsletterSignup compact source="footer" />
         </div>
 
         {/* Social */}
