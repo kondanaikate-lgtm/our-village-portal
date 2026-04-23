@@ -103,7 +103,7 @@ const SettingsAdmin = () => {
     const [infoResult, socialResult, settingsResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
-      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit").eq("key", "main").maybeSingle(),
+      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit,hero_autoplay_start,hero_autoplay_end,hero_respect_reduced_motion,hero_height_aspect,hero_aspect_ratio").eq("key", "main").maybeSingle(),
     ]);
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
