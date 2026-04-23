@@ -132,7 +132,9 @@ export const HeroSection = ({ settingsOverride, previewBanners }: HeroSectionPro
   const imgClass = cn(
     "w-full",
     isImageOnly
-      ? cn("h-auto mx-auto", imageOnlyMaxH, settings.heroImageFit === "contain" ? "object-contain" : "object-cover")
+      ? settings.heroImageFit === "contain"
+        ? cn("h-auto mx-auto object-contain", imageOnlyMaxH)
+        : cn("mx-auto object-cover", imageOnlyMaxH, "h-[60vh]")
       : cn("h-full", fitClass),
   );
 
