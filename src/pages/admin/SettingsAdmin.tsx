@@ -13,6 +13,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { HeroSection } from "@/components/home/HeroSection";
+import { defaultSiteSettings, type SiteSettings } from "@/hooks/use-site-settings";
+import { Slider } from "@/components/ui/slider";
 
 const INFO_SECTIONS = [
   { key: "history", title: "ประวัติความเป็นมา" },
@@ -51,6 +54,11 @@ interface SiteSettingsRow {
   logo_url: string | null;
   hero_display_mode: "single" | "carousel";
   hero_layout: "overlay" | "image-only";
+  hero_height: "compact" | "normal" | "tall";
+  hero_autoplay: boolean;
+  hero_autoplay_delay: number;
+  hero_show_cta: boolean;
+  hero_image_fit: "cover" | "contain";
 }
 
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
@@ -64,7 +72,17 @@ const SettingsAdmin = () => {
   const [socials, setSocials] = useState<SocialRow[]>([]);
   const [socialOpen, setSocialOpen] = useState(false);
   const [socialForm, setSocialForm] = useState<(typeof emptySocial) & { id?: string }>(emptySocial);
-  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({ site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2", logo_url: null, hero_display_mode: "carousel", hero_layout: "overlay" });
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({
+    site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2",
+    logo_url: null,
+    hero_display_mode: "carousel",
+    hero_layout: "overlay",
+    hero_height: "normal",
+    hero_autoplay: true,
+    hero_autoplay_delay: 5500,
+    hero_show_cta: true,
+    hero_image_fit: "cover",
+  });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
@@ -73,7 +91,7 @@ const SettingsAdmin = () => {
     const [infoResult, socialResult, settingsResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
-      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout").eq("key", "main").maybeSingle(),
+      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit").eq("key", "main").maybeSingle(),
     ]);
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
@@ -90,7 +108,20 @@ const SettingsAdmin = () => {
     });
     setInfos(next);
     setSocials((socialResult.data ?? []) as SocialRow[]);
-    if (settingsResult.data) setSiteSettings(settingsResult.data as SiteSettingsRow);
+    if (settingsResult.data) {
+      const d: any = settingsResult.data;
+      setSiteSettings({
+        site_name: d.site_name ?? "หมู่บ้านแซร์ออ หมู่ที่ 2",
+        logo_url: d.logo_url ?? null,
+        hero_display_mode: d.hero_display_mode === "single" ? "single" : "carousel",
+        hero_layout: d.hero_layout === "image-only" ? "image-only" : "overlay",
+        hero_height: ["compact", "normal", "tall"].includes(d.hero_height) ? d.hero_height : "normal",
+        hero_autoplay: d.hero_autoplay !== false,
+        hero_autoplay_delay: Number(d.hero_autoplay_delay) || 5500,
+        hero_show_cta: d.hero_show_cta !== false,
+        hero_image_fit: d.hero_image_fit === "contain" ? "contain" : "cover",
+      });
+    }
     setLoading(false);
   };
 
@@ -145,6 +176,11 @@ const SettingsAdmin = () => {
       logo_url: siteSettings.logo_url,
       hero_display_mode: siteSettings.hero_display_mode,
       hero_layout: siteSettings.hero_layout,
+      hero_height: siteSettings.hero_height,
+      hero_autoplay: siteSettings.hero_autoplay,
+      hero_autoplay_delay: siteSettings.hero_autoplay_delay,
+      hero_show_cta: siteSettings.hero_show_cta,
+      hero_image_fit: siteSettings.hero_image_fit,
       updated_by: user?.id ?? null,
     });
     setSavingSettings(false);
@@ -224,6 +260,46 @@ const SettingsAdmin = () => {
                 </Select>
                 <p className="text-xs text-muted-foreground">โหมด "โชว์รูปเต็ม" เหมาะกับแบนเนอร์ที่มีข้อความอยู่ในรูปอยู่แล้ว ระบบจะไม่ครอบรูปและไม่แสดงข้อความซ้อนทับ</p>
               </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>ความสูงแบนเนอร์</Label>
+                  <Select value={siteSettings.hero_height} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_height: v as "compact" | "normal" | "tall" }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="compact">เตี้ย (compact)</SelectItem>
+                      <SelectItem value="normal">ปกติ (normal)</SelectItem>
+                      <SelectItem value="tall">สูง (tall) — เห็นรูปเต็มชัดเจน</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>การครอบรูปแบนเนอร์</Label>
+                  <Select value={siteSettings.hero_image_fit} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_image_fit: v as "cover" | "contain" }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cover">เต็มพื้นที่ (cover) — อาจครอบบางส่วน</SelectItem>
+                      <SelectItem value="contain">เห็นรูปเต็ม (contain) — ไม่ครอบ</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">ถ้ารูปแบนเนอร์มีข้อความสำคัญ แนะนำใช้ contain เพื่อไม่ให้โดนครอบหาย</p>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-[auto_1fr_auto] md:items-end">
+                <div className="space-y-1.5">
+                  <Label>เปิดเล่นสไลด์อัตโนมัติ</Label>
+                  <div className="h-10 flex items-center"><Switch checked={siteSettings.hero_autoplay} onCheckedChange={(v) => setSiteSettings((s) => ({ ...s, hero_autoplay: v }))} /></div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>ค้างแต่ละรูปนาน {(siteSettings.hero_autoplay_delay / 1000).toFixed(1)} วินาที</Label>
+                  <Slider min={2} max={30} step={0.5} value={[siteSettings.hero_autoplay_delay / 1000]} onValueChange={([v]) => setSiteSettings((s) => ({ ...s, hero_autoplay_delay: Math.round(v * 1000) }))} disabled={!siteSettings.hero_autoplay} />
+                  <p className="text-xs text-muted-foreground">ปรับได้ 2 - 30 วินาที (ใช้กับโหมด "เปลี่ยนรูปไปเรื่อย ๆ")</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>แสดงปุ่ม CTA (โหมด overlay)</Label>
+                  <div className="h-10 flex items-center"><Switch checked={siteSettings.hero_show_cta} onCheckedChange={(v) => setSiteSettings((s) => ({ ...s, hero_show_cta: v }))} disabled={siteSettings.hero_layout === "image-only"} /></div>
+                  <p className="text-xs text-muted-foreground">ในโหมด "โชว์รูปเต็ม" จะไม่มีข้อความ/ปุ่มอยู่แล้ว</p>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label>โลโก้เว็บไซต์</Label>
                 <div className="flex flex-wrap items-center gap-3">
@@ -233,6 +309,28 @@ const SettingsAdmin = () => {
                   {uploadingLogo && <span className="inline-flex items-center text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin mr-1" /> กำลังอัปโหลด</span>}
                 </div>
                 <p className="text-xs text-muted-foreground flex items-center gap-1"><Upload className="h-3 w-3" /> รองรับไฟล์รูปภาพทั่วไป แนะนำ PNG/JPG</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>ตัวอย่างแบนเนอร์ (Live Preview)</Label>
+                  <span className="text-xs text-muted-foreground">เปลี่ยนค่าด้านบนแล้วเห็นผลทันที</span>
+                </div>
+                <div className="rounded-lg overflow-hidden border border-border">
+                  <HeroSection
+                    settingsOverride={{
+                      ...defaultSiteSettings,
+                      siteName: siteSettings.site_name,
+                      logoUrl: siteSettings.logo_url,
+                      heroDisplayMode: siteSettings.hero_display_mode,
+                      heroLayout: siteSettings.hero_layout,
+                      heroHeight: siteSettings.hero_height,
+                      heroAutoplay: siteSettings.hero_autoplay,
+                      heroAutoplayDelay: siteSettings.hero_autoplay_delay,
+                      heroShowCta: siteSettings.hero_show_cta,
+                      heroImageFit: siteSettings.hero_image_fit,
+                    } as SiteSettings}
+                  />
+                </div>
               </div>
               <div className="flex justify-end"><Button variant="royal" onClick={saveSiteSettings} disabled={savingSettings || uploadingLogo}>{savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} บันทึกการตั้งค่า</Button></div>
             </Card>
