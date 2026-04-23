@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, Image as ImageIcon, Loader2, Pencil, Plus, Save, Settings, Trash2, Upload } from "lucide-react";
+import { ExternalLink, Image as ImageIcon, Loader2, Pencil, Play, Plus, Save, Settings, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,11 +54,16 @@ interface SiteSettingsRow {
   logo_url: string | null;
   hero_display_mode: "single" | "carousel";
   hero_layout: "overlay" | "image-only";
-  hero_height: "compact" | "normal" | "tall";
+  hero_height: "compact" | "normal" | "tall" | "aspect";
   hero_autoplay: boolean;
   hero_autoplay_delay: number;
   hero_show_cta: boolean;
   hero_image_fit: "cover" | "contain";
+  hero_autoplay_start: string | null;
+  hero_autoplay_end: string | null;
+  hero_respect_reduced_motion: boolean;
+  hero_height_aspect: boolean;
+  hero_aspect_ratio: string;
 }
 
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
