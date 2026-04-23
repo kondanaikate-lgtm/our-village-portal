@@ -176,6 +176,11 @@ const SettingsAdmin = () => {
       logo_url: siteSettings.logo_url,
       hero_display_mode: siteSettings.hero_display_mode,
       hero_layout: siteSettings.hero_layout,
+      hero_height: siteSettings.hero_height,
+      hero_autoplay: siteSettings.hero_autoplay,
+      hero_autoplay_delay: siteSettings.hero_autoplay_delay,
+      hero_show_cta: siteSettings.hero_show_cta,
+      hero_image_fit: siteSettings.hero_image_fit,
       updated_by: user?.id ?? null,
     });
     setSavingSettings(false);
