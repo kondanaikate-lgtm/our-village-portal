@@ -50,6 +50,7 @@ interface SiteSettingsRow {
   site_name: string;
   logo_url: string | null;
   hero_display_mode: "single" | "carousel";
+  hero_layout: "overlay" | "image-only";
 }
 
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
@@ -63,7 +64,7 @@ const SettingsAdmin = () => {
   const [socials, setSocials] = useState<SocialRow[]>([]);
   const [socialOpen, setSocialOpen] = useState(false);
   const [socialForm, setSocialForm] = useState<(typeof emptySocial) & { id?: string }>(emptySocial);
-  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({ site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2", logo_url: null, hero_display_mode: "carousel" });
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({ site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2", logo_url: null, hero_display_mode: "carousel", hero_layout: "overlay" });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
@@ -72,7 +73,7 @@ const SettingsAdmin = () => {
     const [infoResult, socialResult, settingsResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
-      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode").eq("key", "main").maybeSingle(),
+      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout").eq("key", "main").maybeSingle(),
     ]);
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
@@ -143,6 +144,7 @@ const SettingsAdmin = () => {
       site_name: siteSettings.site_name.trim(),
       logo_url: siteSettings.logo_url,
       hero_display_mode: siteSettings.hero_display_mode,
+      hero_layout: siteSettings.hero_layout,
       updated_by: user?.id ?? null,
     });
     setSavingSettings(false);

@@ -92,20 +92,21 @@ export const HeroSection = () => {
       ? slides.map((s) => ({ src: s.image_url, alt: s.title ?? "banner", href: s.link_url }))
       : [{ src: heroImage, alt: "ภาพมุมสูงหมู่บ้านแซร์ออ" }];
   const displayVisuals = settings.heroDisplayMode === "single" ? visuals.slice(0, 1) : visuals;
+  const isImageOnly = settings.heroLayout === "image-only";
 
   return (
-    <section className="relative isolate overflow-hidden">
-      <div className="absolute inset-0 -z-10">
+    <section className={cn("relative isolate overflow-hidden", isImageOnly && "bg-primary")}>
+      <div className={cn(isImageOnly ? "relative" : "absolute inset-0 -z-10")}>
         {displayVisuals.length === 1 ? (
           <>
             {displayVisuals[0].href ? (
               <a href={displayVisuals[0].href} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
-                <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className="h-full w-full object-cover" />
+                <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className={cn("w-full", isImageOnly ? "h-auto max-h-[80vh] object-contain mx-auto" : "h-full object-cover")} />
               </a>
             ) : (
-              <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className="h-full w-full object-cover" />
+              <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className={cn("w-full", isImageOnly ? "h-auto max-h-[80vh] object-contain mx-auto" : "h-full object-cover")} />
             )}
-            <div className="absolute inset-0 bg-gradient-hero" />
+            {!isImageOnly && <div className="absolute inset-0 bg-gradient-hero" />}
           </>
         ) : (
           <>
@@ -118,20 +119,20 @@ export const HeroSection = () => {
               <CarouselContent className="h-full ml-0">
                 {displayVisuals.map((v, i) => (
                   <CarouselItem key={i} className="pl-0 basis-full">
-                    <div className="relative h-full w-full min-h-[480px] md:min-h-[560px] lg:min-h-[640px]">
+                    <div className={cn("relative w-full", isImageOnly ? "min-h-0" : "h-full min-h-[480px] md:min-h-[560px] lg:min-h-[640px]")}>
                       {v.href ? (
                         <a href={v.href} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
-                          <img src={v.src} alt={v.alt} className="h-full w-full object-cover" />
+                          <img src={v.src} alt={v.alt} className={cn("w-full", isImageOnly ? "h-auto max-h-[80vh] object-contain mx-auto" : "h-full object-cover")} />
                         </a>
                       ) : (
-                        <img src={v.src} alt={v.alt} className="h-full w-full object-cover" />
+                        <img src={v.src} alt={v.alt} className={cn("w-full", isImageOnly ? "h-auto max-h-[80vh] object-contain mx-auto" : "h-full object-cover")} />
                       )}
                     </div>
                   </CarouselItem>
                 ))}
               </CarouselContent>
             </Carousel>
-            <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
+            {!isImageOnly && <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />}
             {/* Dots */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
               {displayVisuals.map((_, i) => (
@@ -150,7 +151,7 @@ export const HeroSection = () => {
         )}
       </div>
 
-      <HeroOverlay siteName={settings.siteName} />
+      {!isImageOnly && <HeroOverlay siteName={settings.siteName} />}
 
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-gold" />
     </section>
