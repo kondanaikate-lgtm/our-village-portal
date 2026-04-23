@@ -213,6 +213,17 @@ const SettingsAdmin = () => {
                 <div className="space-y-1.5"><Label>ชื่อเว็บไซต์</Label><Input value={siteSettings.site_name} onChange={(e) => setSiteSettings((s) => ({ ...s, site_name: e.target.value }))} /></div>
                 <div className="space-y-1.5"><Label>รูปแบบแบนเนอร์พื้นหลัง</Label><Select value={siteSettings.hero_display_mode} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_display_mode: v as "single" | "carousel" }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="single">ค้างรูปเดียว</SelectItem><SelectItem value="carousel">เปลี่ยนรูปไปเรื่อย ๆ</SelectItem></SelectContent></Select></div>
               </div>
+              <div className="space-y-1.5">
+                <Label>โหมดการแสดงผลแบนเนอร์</Label>
+                <Select value={siteSettings.hero_layout} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_layout: v as "overlay" | "image-only" }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="overlay">แสดงข้อความและปุ่มทับรูป (ค่าเริ่มต้น)</SelectItem>
+                    <SelectItem value="image-only">โชว์รูปแบนเนอร์เต็ม ๆ ไม่มีตัวหนังสือบัง</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">โหมด "โชว์รูปเต็ม" เหมาะกับแบนเนอร์ที่มีข้อความอยู่ในรูปอยู่แล้ว ระบบจะไม่ครอบรูปและไม่แสดงข้อความซ้อนทับ</p>
+              </div>
               <div className="space-y-2">
                 <Label>โลโก้เว็บไซต์</Label>
                 <div className="flex flex-wrap items-center gap-3">
