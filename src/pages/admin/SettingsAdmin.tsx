@@ -374,10 +374,26 @@ const SettingsAdmin = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>ตัวอย่างแบนเนอร์ (Live Preview)</Label>
-                  <span className="text-xs text-muted-foreground">เปลี่ยนค่าด้านบนแล้วเห็นผลทันที</span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPreviewForceAutoplay(true);
+                        setPreviewResetKey((k) => k + 1);
+                        toast.success("รีเซ็ตและเล่นสไลด์โชว์ใหม่ตามความเร็วปัจจุบัน");
+                      }}
+                    >
+                      <Play className="h-4 w-4" /> ลองใช้กับโหมดนี้
+                    </Button>
+                    <span className="text-xs text-muted-foreground hidden md:inline">เปลี่ยนค่าด้านบนแล้วเห็นผลทันที</span>
+                  </div>
                 </div>
                 <div className="rounded-lg overflow-hidden border border-border">
                   <HeroSection
+                    resetKey={previewResetKey}
+                    forceAutoplay={previewForceAutoplay}
                     settingsOverride={{
                       ...defaultSiteSettings,
                       siteName: siteSettings.site_name,
@@ -389,6 +405,11 @@ const SettingsAdmin = () => {
                       heroAutoplayDelay: siteSettings.hero_autoplay_delay,
                       heroShowCta: siteSettings.hero_show_cta,
                       heroImageFit: siteSettings.hero_image_fit,
+                      heroAutoplayStart: siteSettings.hero_autoplay_start,
+                      heroAutoplayEnd: siteSettings.hero_autoplay_end,
+                      heroRespectReducedMotion: siteSettings.hero_respect_reduced_motion,
+                      heroHeightAspect: siteSettings.hero_height_aspect,
+                      heroAspectRatio: siteSettings.hero_aspect_ratio,
                     } as SiteSettings}
                   />
                 </div>
