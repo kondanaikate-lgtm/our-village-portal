@@ -554,12 +554,17 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          hero_aspect_ratio: string
           hero_autoplay: boolean
           hero_autoplay_delay: number
+          hero_autoplay_end: string | null
+          hero_autoplay_start: string | null
           hero_display_mode: string
           hero_height: string
+          hero_height_aspect: boolean
           hero_image_fit: string
           hero_layout: string
+          hero_respect_reduced_motion: boolean
           hero_show_cta: boolean
           key: string
           logo_url: string | null
@@ -568,12 +573,17 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          hero_aspect_ratio?: string
           hero_autoplay?: boolean
           hero_autoplay_delay?: number
+          hero_autoplay_end?: string | null
+          hero_autoplay_start?: string | null
           hero_display_mode?: string
           hero_height?: string
+          hero_height_aspect?: boolean
           hero_image_fit?: string
           hero_layout?: string
+          hero_respect_reduced_motion?: boolean
           hero_show_cta?: boolean
           key?: string
           logo_url?: string | null
@@ -582,12 +592,17 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          hero_aspect_ratio?: string
           hero_autoplay?: boolean
           hero_autoplay_delay?: number
+          hero_autoplay_end?: string | null
+          hero_autoplay_start?: string | null
           hero_display_mode?: string
           hero_height?: string
+          hero_height_aspect?: boolean
           hero_image_fit?: string
           hero_layout?: string
+          hero_respect_reduced_motion?: boolean
           hero_show_cta?: boolean
           key?: string
           logo_url?: string | null

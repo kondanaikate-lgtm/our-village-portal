@@ -64,6 +64,8 @@ const heightClass = (h: SiteSettings["heroHeight"], imageOnly: boolean) => {
       return "h-full min-h-[320px] md:min-h-[400px] lg:min-h-[460px]";
     case "tall":
       return "h-full min-h-[560px] md:min-h-[680px] lg:min-h-[820px]";
+    case "aspect":
+      return "h-full"; // height controlled by parent aspect ratio wrapper
     default:
       return "h-full min-h-[480px] md:min-h-[560px] lg:min-h-[640px]";
   }
@@ -75,22 +77,68 @@ const imageOnlyMaxHClass = (h: SiteSettings["heroHeight"]) => {
       return "max-h-[55vh]";
     case "tall":
       return "max-h-[92vh]";
+    case "aspect":
+      return "";
     default:
       return "max-h-[80vh]";
   }
 };
 
+const parseAspect = (s: string): number | null => {
+  const m = s?.match(/^(\d+(?:\.\d+)?)\s*[\/:]\s*(\d+(?:\.\d+)?)$/);
+  if (!m) return null;
+  const w = parseFloat(m[1]);
+  const h = parseFloat(m[2]);
+  if (!w || !h) return null;
+  return w / h;
+};
+
+const isWithinSchedule = (start: string | null, end: string | null): boolean => {
+  if (!start && !end) return true;
+  const now = new Date();
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const toMin = (t: string) => {
+    const [h, m] = t.split(":").map(Number);
+    return (h || 0) * 60 + (m || 0);
+  };
+  const s = start ? toMin(start) : 0;
+  const e = end ? toMin(end) : 24 * 60;
+  if (s <= e) return cur >= s && cur < e;
+  // wraps midnight
+  return cur >= s || cur < e;
+};
+
 interface HeroSectionProps {
   settingsOverride?: SiteSettings;
   previewBanners?: { src: string; alt: string; href?: string | null }[];
+  forceAutoplay?: boolean;
+  resetKey?: number | string;
 }
 
-export const HeroSection = ({ settingsOverride, previewBanners }: HeroSectionProps = {}) => {
+export const HeroSection = ({ settingsOverride, previewBanners, forceAutoplay, resetKey }: HeroSectionProps = {}) => {
   const [slides, setSlides] = useState<BannerSlide[]>([]);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const { settings: liveSettings } = useSiteSettings();
   const settings = settingsOverride ?? liveSettings;
+
+  // Detect prefers-reduced-motion
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener?.("change", handler);
+    return () => mq.removeEventListener?.("change", handler);
+  }, []);
+
+  // Re-evaluate schedule periodically
+  const [scheduleTick, setScheduleTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setScheduleTick((n) => n + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (previewBanners) return;
@@ -118,6 +166,12 @@ export const HeroSection = ({ settingsOverride, previewBanners }: HeroSectionPro
     api.on("select", () => setCurrent(api.selectedScrollSnap()));
   }, [api]);
 
+  // Force-restart carousel when resetKey changes (used by "ลองใช้กับโหมดนี้")
+  useEffect(() => {
+    if (!api || resetKey === undefined) return;
+    api.scrollTo(0, true);
+  }, [api, resetKey]);
+
   // Build the visual list — fall back to default hero if no banners
   const visuals: { src: string; alt: string; href?: string | null }[] = previewBanners
     ? previewBanners
@@ -127,8 +181,10 @@ export const HeroSection = ({ settingsOverride, previewBanners }: HeroSectionPro
   const displayVisuals = settings.heroDisplayMode === "single" ? visuals.slice(0, 1) : visuals;
   const isImageOnly = settings.heroLayout === "image-only";
   const fitClass = settings.heroImageFit === "contain" ? "object-contain" : "object-cover";
-  const containerHeight = heightClass(settings.heroHeight, isImageOnly);
-  const imageOnlyMaxH = imageOnlyMaxHClass(settings.heroHeight);
+  const useAspect = settings.heroHeightAspect || settings.heroHeight === "aspect";
+  const aspectRatio = parseAspect(settings.heroAspectRatio || "16/9") ?? 16 / 9;
+  const containerHeight = heightClass(useAspect ? "aspect" : settings.heroHeight, isImageOnly);
+  const imageOnlyMaxH = imageOnlyMaxHClass(useAspect ? "aspect" : settings.heroHeight);
   const imgClass = cn(
     "w-full",
     isImageOnly
@@ -138,17 +194,34 @@ export const HeroSection = ({ settingsOverride, previewBanners }: HeroSectionPro
       : cn("h-full", fitClass),
   );
 
+  const reducedMotionBlocked = settings.heroRespectReducedMotion && prefersReducedMotion && !forceAutoplay;
+  const scheduleAllows = forceAutoplay || isWithinSchedule(settings.heroAutoplayStart, settings.heroAutoplayEnd);
+  const autoplayActive =
+    (forceAutoplay || settings.heroAutoplay) && !reducedMotionBlocked && scheduleAllows;
+
+  // resetKey allows the parent to remount the autoplay plugin
   const autoplayPlugins = useMemo(
     () =>
-      settings.heroAutoplay
+      autoplayActive
         ? [Autoplay({ delay: Math.max(1500, settings.heroAutoplayDelay), stopOnInteraction: false })]
         : [],
-    [settings.heroAutoplay, settings.heroAutoplayDelay],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [autoplayActive, settings.heroAutoplayDelay, resetKey, scheduleTick],
   );
 
+  const aspectStyle: React.CSSProperties | undefined = useAspect
+    ? { aspectRatio: `${aspectRatio}` }
+    : undefined;
+
   return (
-    <section className={cn("relative isolate overflow-hidden", isImageOnly && "bg-primary")}>
-      <div className={cn(isImageOnly ? "relative" : "absolute inset-0 -z-10")}>
+    <section
+      className={cn("relative isolate overflow-hidden", isImageOnly && "bg-primary")}
+      style={useAspect && !isImageOnly ? aspectStyle : undefined}
+    >
+      <div
+        className={cn(isImageOnly ? "relative" : "absolute inset-0 -z-10")}
+        style={useAspect && isImageOnly ? aspectStyle : undefined}
+      >
         {displayVisuals.length === 1 ? (
           <>
             {displayVisuals[0].href ? (

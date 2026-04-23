@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, Image as ImageIcon, Loader2, Pencil, Plus, Save, Settings, Trash2, Upload } from "lucide-react";
+import { ExternalLink, Image as ImageIcon, Loader2, Pencil, Play, Plus, Save, Settings, Trash2, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,11 +54,16 @@ interface SiteSettingsRow {
   logo_url: string | null;
   hero_display_mode: "single" | "carousel";
   hero_layout: "overlay" | "image-only";
-  hero_height: "compact" | "normal" | "tall";
+  hero_height: "compact" | "normal" | "tall" | "aspect";
   hero_autoplay: boolean;
   hero_autoplay_delay: number;
   hero_show_cta: boolean;
   hero_image_fit: "cover" | "contain";
+  hero_autoplay_start: string | null;
+  hero_autoplay_end: string | null;
+  hero_respect_reduced_motion: boolean;
+  hero_height_aspect: boolean;
+  hero_aspect_ratio: string;
 }
 
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
@@ -82,16 +87,23 @@ const SettingsAdmin = () => {
     hero_autoplay_delay: 5500,
     hero_show_cta: true,
     hero_image_fit: "cover",
+    hero_autoplay_start: null,
+    hero_autoplay_end: null,
+    hero_respect_reduced_motion: true,
+    hero_height_aspect: false,
+    hero_aspect_ratio: "16/9",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [previewResetKey, setPreviewResetKey] = useState(0);
+  const [previewForceAutoplay, setPreviewForceAutoplay] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const [infoResult, socialResult, settingsResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
-      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit").eq("key", "main").maybeSingle(),
+      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit,hero_autoplay_start,hero_autoplay_end,hero_respect_reduced_motion,hero_height_aspect,hero_aspect_ratio").eq("key", "main").maybeSingle(),
     ]);
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
@@ -110,16 +122,22 @@ const SettingsAdmin = () => {
     setSocials((socialResult.data ?? []) as SocialRow[]);
     if (settingsResult.data) {
       const d: any = settingsResult.data;
+      const trimTime = (t: string | null | undefined) => (t ? String(t).slice(0, 5) : null);
       setSiteSettings({
         site_name: d.site_name ?? "หมู่บ้านแซร์ออ หมู่ที่ 2",
         logo_url: d.logo_url ?? null,
         hero_display_mode: d.hero_display_mode === "single" ? "single" : "carousel",
         hero_layout: d.hero_layout === "image-only" ? "image-only" : "overlay",
-        hero_height: ["compact", "normal", "tall"].includes(d.hero_height) ? d.hero_height : "normal",
+        hero_height: ["compact", "normal", "tall", "aspect"].includes(d.hero_height) ? d.hero_height : "normal",
         hero_autoplay: d.hero_autoplay !== false,
         hero_autoplay_delay: Number(d.hero_autoplay_delay) || 5500,
         hero_show_cta: d.hero_show_cta !== false,
         hero_image_fit: d.hero_image_fit === "contain" ? "contain" : "cover",
+        hero_autoplay_start: trimTime(d.hero_autoplay_start),
+        hero_autoplay_end: trimTime(d.hero_autoplay_end),
+        hero_respect_reduced_motion: d.hero_respect_reduced_motion !== false,
+        hero_height_aspect: d.hero_height_aspect === true,
+        hero_aspect_ratio: d.hero_aspect_ratio || "16/9",
       });
     }
     setLoading(false);
@@ -181,6 +199,11 @@ const SettingsAdmin = () => {
       hero_autoplay_delay: siteSettings.hero_autoplay_delay,
       hero_show_cta: siteSettings.hero_show_cta,
       hero_image_fit: siteSettings.hero_image_fit,
+      hero_autoplay_start: siteSettings.hero_autoplay_start || null,
+      hero_autoplay_end: siteSettings.hero_autoplay_end || null,
+      hero_respect_reduced_motion: siteSettings.hero_respect_reduced_motion,
+      hero_height_aspect: siteSettings.hero_height_aspect,
+      hero_aspect_ratio: siteSettings.hero_aspect_ratio || "16/9",
       updated_by: user?.id ?? null,
     });
     setSavingSettings(false);
@@ -263,14 +286,34 @@ const SettingsAdmin = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label>ความสูงแบนเนอร์</Label>
-                  <Select value={siteSettings.hero_height} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_height: v as "compact" | "normal" | "tall" }))}>
+                  <Select value={siteSettings.hero_height_aspect ? "aspect" : siteSettings.hero_height} onValueChange={(v) => setSiteSettings((s) => v === "aspect"
+                    ? { ...s, hero_height_aspect: true, hero_height: "normal" }
+                    : { ...s, hero_height_aspect: false, hero_height: v as "compact" | "normal" | "tall" })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="compact">เตี้ย (compact)</SelectItem>
                       <SelectItem value="normal">ปกติ (normal)</SelectItem>
                       <SelectItem value="tall">สูง (tall) — เห็นรูปเต็มชัดเจน</SelectItem>
+                      <SelectItem value="aspect">ปรับตามสัดส่วนรูป (aspect ratio)</SelectItem>
                     </SelectContent>
                   </Select>
+                  {(siteSettings.hero_height_aspect || siteSettings.hero_height === "aspect") && (
+                    <div className="pt-2 space-y-1.5">
+                      <Label className="text-xs">อัตราส่วนภาพ</Label>
+                      <Select value={siteSettings.hero_aspect_ratio} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_aspect_ratio: v }))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="21/9">21:9 (ultra-wide)</SelectItem>
+                          <SelectItem value="16/9">16:9 (widescreen)</SelectItem>
+                          <SelectItem value="3/2">3:2</SelectItem>
+                          <SelectItem value="4/3">4:3</SelectItem>
+                          <SelectItem value="1/1">1:1 (จัตุรัส)</SelectItem>
+                          <SelectItem value="4/5">4:5 (portrait)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">โหมดนี้จะปรับความสูงตามสัดส่วนของภาพแบนเนอร์ ทำให้ภาพที่สัดส่วนต่างกันไม่ถูกบังคับเกินไป</p>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <Label>การครอบรูปแบนเนอร์</Label>
@@ -300,6 +343,24 @@ const SettingsAdmin = () => {
                   <p className="text-xs text-muted-foreground">ในโหมด "โชว์รูปเต็ม" จะไม่มีข้อความ/ปุ่มอยู่แล้ว</p>
                 </div>
               </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label>เริ่ม Autoplay (เวลา)</Label>
+                  <Input type="time" value={siteSettings.hero_autoplay_start ?? ""} onChange={(e) => setSiteSettings((s) => ({ ...s, hero_autoplay_start: e.target.value || null }))} disabled={!siteSettings.hero_autoplay} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>หยุด Autoplay (เวลา)</Label>
+                  <Input type="time" value={siteSettings.hero_autoplay_end ?? ""} onChange={(e) => setSiteSettings((s) => ({ ...s, hero_autoplay_end: e.target.value || null }))} disabled={!siteSettings.hero_autoplay} />
+                  <p className="text-xs text-muted-foreground">เว้นว่างทั้งสองช่อง = เล่นตลอดเวลา (รองรับช่วงข้ามเที่ยงคืน)</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>เคารพ "ลดการเคลื่อนไหว"</Label>
+                  <div className="h-10 flex items-center gap-2">
+                    <Switch checked={siteSettings.hero_respect_reduced_motion} onCheckedChange={(v) => setSiteSettings((s) => ({ ...s, hero_respect_reduced_motion: v }))} />
+                    <span className="text-xs text-muted-foreground">ปิด autoplay อัตโนมัติเมื่อผู้ใช้เปิด prefers-reduced-motion</span>
+                  </div>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label>โลโก้เว็บไซต์</Label>
                 <div className="flex flex-wrap items-center gap-3">
@@ -313,10 +374,26 @@ const SettingsAdmin = () => {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>ตัวอย่างแบนเนอร์ (Live Preview)</Label>
-                  <span className="text-xs text-muted-foreground">เปลี่ยนค่าด้านบนแล้วเห็นผลทันที</span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setPreviewForceAutoplay(true);
+                        setPreviewResetKey((k) => k + 1);
+                        toast.success("รีเซ็ตและเล่นสไลด์โชว์ใหม่ตามความเร็วปัจจุบัน");
+                      }}
+                    >
+                      <Play className="h-4 w-4" /> ลองใช้กับโหมดนี้
+                    </Button>
+                    <span className="text-xs text-muted-foreground hidden md:inline">เปลี่ยนค่าด้านบนแล้วเห็นผลทันที</span>
+                  </div>
                 </div>
                 <div className="rounded-lg overflow-hidden border border-border">
                   <HeroSection
+                    resetKey={previewResetKey}
+                    forceAutoplay={previewForceAutoplay}
                     settingsOverride={{
                       ...defaultSiteSettings,
                       siteName: siteSettings.site_name,
@@ -328,6 +405,11 @@ const SettingsAdmin = () => {
                       heroAutoplayDelay: siteSettings.hero_autoplay_delay,
                       heroShowCta: siteSettings.hero_show_cta,
                       heroImageFit: siteSettings.hero_image_fit,
+                      heroAutoplayStart: siteSettings.hero_autoplay_start,
+                      heroAutoplayEnd: siteSettings.hero_autoplay_end,
+                      heroRespectReducedMotion: siteSettings.hero_respect_reduced_motion,
+                      heroHeightAspect: siteSettings.hero_height_aspect,
+                      heroAspectRatio: siteSettings.hero_aspect_ratio,
                     } as SiteSettings}
                   />
                 </div>
