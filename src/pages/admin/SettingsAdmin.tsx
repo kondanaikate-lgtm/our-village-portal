@@ -13,6 +13,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { HeroSection } from "@/components/home/HeroSection";
+import { defaultSiteSettings, type SiteSettings } from "@/hooks/use-site-settings";
+import { Slider } from "@/components/ui/slider";
 
 const INFO_SECTIONS = [
   { key: "history", title: "ประวัติความเป็นมา" },
@@ -51,6 +54,11 @@ interface SiteSettingsRow {
   logo_url: string | null;
   hero_display_mode: "single" | "carousel";
   hero_layout: "overlay" | "image-only";
+  hero_height: "compact" | "normal" | "tall";
+  hero_autoplay: boolean;
+  hero_autoplay_delay: number;
+  hero_show_cta: boolean;
+  hero_image_fit: "cover" | "contain";
 }
 
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
@@ -64,7 +72,17 @@ const SettingsAdmin = () => {
   const [socials, setSocials] = useState<SocialRow[]>([]);
   const [socialOpen, setSocialOpen] = useState(false);
   const [socialForm, setSocialForm] = useState<(typeof emptySocial) & { id?: string }>(emptySocial);
-  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({ site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2", logo_url: null, hero_display_mode: "carousel", hero_layout: "overlay" });
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({
+    site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2",
+    logo_url: null,
+    hero_display_mode: "carousel",
+    hero_layout: "overlay",
+    hero_height: "normal",
+    hero_autoplay: true,
+    hero_autoplay_delay: 5500,
+    hero_show_cta: true,
+    hero_image_fit: "cover",
+  });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
@@ -73,7 +91,7 @@ const SettingsAdmin = () => {
     const [infoResult, socialResult, settingsResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
-      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout").eq("key", "main").maybeSingle(),
+      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit").eq("key", "main").maybeSingle(),
     ]);
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
@@ -90,7 +108,20 @@ const SettingsAdmin = () => {
     });
     setInfos(next);
     setSocials((socialResult.data ?? []) as SocialRow[]);
-    if (settingsResult.data) setSiteSettings(settingsResult.data as SiteSettingsRow);
+    if (settingsResult.data) {
+      const d: any = settingsResult.data;
+      setSiteSettings({
+        site_name: d.site_name ?? "หมู่บ้านแซร์ออ หมู่ที่ 2",
+        logo_url: d.logo_url ?? null,
+        hero_display_mode: d.hero_display_mode === "single" ? "single" : "carousel",
+        hero_layout: d.hero_layout === "image-only" ? "image-only" : "overlay",
+        hero_height: ["compact", "normal", "tall"].includes(d.hero_height) ? d.hero_height : "normal",
+        hero_autoplay: d.hero_autoplay !== false,
+        hero_autoplay_delay: Number(d.hero_autoplay_delay) || 5500,
+        hero_show_cta: d.hero_show_cta !== false,
+        hero_image_fit: d.hero_image_fit === "contain" ? "contain" : "cover",
+      });
+    }
     setLoading(false);
   };
 
