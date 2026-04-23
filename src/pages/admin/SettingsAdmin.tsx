@@ -286,14 +286,34 @@ const SettingsAdmin = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label>ความสูงแบนเนอร์</Label>
-                  <Select value={siteSettings.hero_height} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_height: v as "compact" | "normal" | "tall" }))}>
+                  <Select value={siteSettings.hero_height_aspect ? "aspect" : siteSettings.hero_height} onValueChange={(v) => setSiteSettings((s) => v === "aspect"
+                    ? { ...s, hero_height_aspect: true, hero_height: "normal" }
+                    : { ...s, hero_height_aspect: false, hero_height: v as "compact" | "normal" | "tall" })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="compact">เตี้ย (compact)</SelectItem>
                       <SelectItem value="normal">ปกติ (normal)</SelectItem>
                       <SelectItem value="tall">สูง (tall) — เห็นรูปเต็มชัดเจน</SelectItem>
+                      <SelectItem value="aspect">ปรับตามสัดส่วนรูป (aspect ratio)</SelectItem>
                     </SelectContent>
                   </Select>
+                  {(siteSettings.hero_height_aspect || siteSettings.hero_height === "aspect") && (
+                    <div className="pt-2 space-y-1.5">
+                      <Label className="text-xs">อัตราส่วนภาพ</Label>
+                      <Select value={siteSettings.hero_aspect_ratio} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_aspect_ratio: v }))}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="21/9">21:9 (ultra-wide)</SelectItem>
+                          <SelectItem value="16/9">16:9 (widescreen)</SelectItem>
+                          <SelectItem value="3/2">3:2</SelectItem>
+                          <SelectItem value="4/3">4:3</SelectItem>
+                          <SelectItem value="1/1">1:1 (จัตุรัส)</SelectItem>
+                          <SelectItem value="4/5">4:5 (portrait)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">โหมดนี้จะปรับความสูงตามสัดส่วนของภาพแบนเนอร์ ทำให้ภาพที่สัดส่วนต่างกันไม่ถูกบังคับเกินไป</p>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <Label>การครอบรูปแบนเนอร์</Label>
@@ -321,6 +341,24 @@ const SettingsAdmin = () => {
                   <Label>แสดงปุ่ม CTA (โหมด overlay)</Label>
                   <div className="h-10 flex items-center"><Switch checked={siteSettings.hero_show_cta} onCheckedChange={(v) => setSiteSettings((s) => ({ ...s, hero_show_cta: v }))} disabled={siteSettings.hero_layout === "image-only"} /></div>
                   <p className="text-xs text-muted-foreground">ในโหมด "โชว์รูปเต็ม" จะไม่มีข้อความ/ปุ่มอยู่แล้ว</p>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label>เริ่ม Autoplay (เวลา)</Label>
+                  <Input type="time" value={siteSettings.hero_autoplay_start ?? ""} onChange={(e) => setSiteSettings((s) => ({ ...s, hero_autoplay_start: e.target.value || null }))} disabled={!siteSettings.hero_autoplay} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>หยุด Autoplay (เวลา)</Label>
+                  <Input type="time" value={siteSettings.hero_autoplay_end ?? ""} onChange={(e) => setSiteSettings((s) => ({ ...s, hero_autoplay_end: e.target.value || null }))} disabled={!siteSettings.hero_autoplay} />
+                  <p className="text-xs text-muted-foreground">เว้นว่างทั้งสองช่อง = เล่นตลอดเวลา (รองรับช่วงข้ามเที่ยงคืน)</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>เคารพ "ลดการเคลื่อนไหว"</Label>
+                  <div className="h-10 flex items-center gap-2">
+                    <Switch checked={siteSettings.hero_respect_reduced_motion} onCheckedChange={(v) => setSiteSettings((s) => ({ ...s, hero_respect_reduced_motion: v }))} />
+                    <span className="text-xs text-muted-foreground">ปิด autoplay อัตโนมัติเมื่อผู้ใช้เปิด prefers-reduced-motion</span>
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
