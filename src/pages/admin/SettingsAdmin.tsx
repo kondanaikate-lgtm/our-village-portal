@@ -87,9 +87,16 @@ const SettingsAdmin = () => {
     hero_autoplay_delay: 5500,
     hero_show_cta: true,
     hero_image_fit: "cover",
+    hero_autoplay_start: null,
+    hero_autoplay_end: null,
+    hero_respect_reduced_motion: true,
+    hero_height_aspect: false,
+    hero_aspect_ratio: "16/9",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [previewResetKey, setPreviewResetKey] = useState(0);
+  const [previewForceAutoplay, setPreviewForceAutoplay] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -115,16 +122,22 @@ const SettingsAdmin = () => {
     setSocials((socialResult.data ?? []) as SocialRow[]);
     if (settingsResult.data) {
       const d: any = settingsResult.data;
+      const trimTime = (t: string | null | undefined) => (t ? String(t).slice(0, 5) : null);
       setSiteSettings({
         site_name: d.site_name ?? "หมู่บ้านแซร์ออ หมู่ที่ 2",
         logo_url: d.logo_url ?? null,
         hero_display_mode: d.hero_display_mode === "single" ? "single" : "carousel",
         hero_layout: d.hero_layout === "image-only" ? "image-only" : "overlay",
-        hero_height: ["compact", "normal", "tall"].includes(d.hero_height) ? d.hero_height : "normal",
+        hero_height: ["compact", "normal", "tall", "aspect"].includes(d.hero_height) ? d.hero_height : "normal",
         hero_autoplay: d.hero_autoplay !== false,
         hero_autoplay_delay: Number(d.hero_autoplay_delay) || 5500,
         hero_show_cta: d.hero_show_cta !== false,
         hero_image_fit: d.hero_image_fit === "contain" ? "contain" : "cover",
+        hero_autoplay_start: trimTime(d.hero_autoplay_start),
+        hero_autoplay_end: trimTime(d.hero_autoplay_end),
+        hero_respect_reduced_motion: d.hero_respect_reduced_motion !== false,
+        hero_height_aspect: d.hero_height_aspect === true,
+        hero_aspect_ratio: d.hero_aspect_ratio || "16/9",
       });
     }
     setLoading(false);
