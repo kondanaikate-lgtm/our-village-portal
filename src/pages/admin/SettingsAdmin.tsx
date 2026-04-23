@@ -50,6 +50,7 @@ interface SiteSettingsRow {
   site_name: string;
   logo_url: string | null;
   hero_display_mode: "single" | "carousel";
+  hero_layout: "overlay" | "image-only";
 }
 
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
@@ -63,7 +64,7 @@ const SettingsAdmin = () => {
   const [socials, setSocials] = useState<SocialRow[]>([]);
   const [socialOpen, setSocialOpen] = useState(false);
   const [socialForm, setSocialForm] = useState<(typeof emptySocial) & { id?: string }>(emptySocial);
-  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({ site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2", logo_url: null, hero_display_mode: "carousel" });
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsRow>({ site_name: "หมู่บ้านแซร์ออ หมู่ที่ 2", logo_url: null, hero_display_mode: "carousel", hero_layout: "overlay" });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
@@ -72,7 +73,7 @@ const SettingsAdmin = () => {
     const [infoResult, socialResult, settingsResult] = await Promise.all([
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
-      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode").eq("key", "main").maybeSingle(),
+      (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout").eq("key", "main").maybeSingle(),
     ]);
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
@@ -143,6 +144,7 @@ const SettingsAdmin = () => {
       site_name: siteSettings.site_name.trim(),
       logo_url: siteSettings.logo_url,
       hero_display_mode: siteSettings.hero_display_mode,
+      hero_layout: siteSettings.hero_layout,
       updated_by: user?.id ?? null,
     });
     setSavingSettings(false);
@@ -210,6 +212,17 @@ const SettingsAdmin = () => {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-1.5"><Label>ชื่อเว็บไซต์</Label><Input value={siteSettings.site_name} onChange={(e) => setSiteSettings((s) => ({ ...s, site_name: e.target.value }))} /></div>
                 <div className="space-y-1.5"><Label>รูปแบบแบนเนอร์พื้นหลัง</Label><Select value={siteSettings.hero_display_mode} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_display_mode: v as "single" | "carousel" }))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="single">ค้างรูปเดียว</SelectItem><SelectItem value="carousel">เปลี่ยนรูปไปเรื่อย ๆ</SelectItem></SelectContent></Select></div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>โหมดการแสดงผลแบนเนอร์</Label>
+                <Select value={siteSettings.hero_layout} onValueChange={(v) => setSiteSettings((s) => ({ ...s, hero_layout: v as "overlay" | "image-only" }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="overlay">แสดงข้อความและปุ่มทับรูป (ค่าเริ่มต้น)</SelectItem>
+                    <SelectItem value="image-only">โชว์รูปแบนเนอร์เต็ม ๆ ไม่มีตัวหนังสือบัง</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">โหมด "โชว์รูปเต็ม" เหมาะกับแบนเนอร์ที่มีข้อความอยู่ในรูปอยู่แล้ว ระบบจะไม่ครอบรูปและไม่แสดงข้อความซ้อนทับ</p>
               </div>
               <div className="space-y-2">
                 <Label>โลโก้เว็บไซต์</Label>

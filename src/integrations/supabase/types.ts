@@ -555,6 +555,7 @@ export type Database = {
       site_settings: {
         Row: {
           hero_display_mode: string
+          hero_layout: string
           key: string
           logo_url: string | null
           site_name: string
@@ -563,6 +564,7 @@ export type Database = {
         }
         Insert: {
           hero_display_mode?: string
+          hero_layout?: string
           key?: string
           logo_url?: string | null
           site_name?: string
@@ -571,6 +573,7 @@ export type Database = {
         }
         Update: {
           hero_display_mode?: string
+          hero_layout?: string
           key?: string
           logo_url?: string | null
           site_name?: string
