@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Autoplay from "embla-carousel-autoplay";
 import { ArrowRight, Megaphone } from "lucide-react";
@@ -13,7 +13,7 @@ import { SITE_INFO } from "@/config/site";
 import { supabase } from "@/integrations/supabase/client";
 import heroImage from "@/assets/hero-village.jpg";
 import { cn } from "@/lib/utils";
-import { useSiteSettings } from "@/hooks/use-site-settings";
+import { useSiteSettings, type SiteSettings } from "@/hooks/use-site-settings";
 
 interface BannerSlide {
   id: string;
@@ -22,7 +22,7 @@ interface BannerSlide {
   link_url: string | null;
 }
 
-const HeroOverlay = ({ siteName }: { siteName: string }) => (
+const HeroOverlay = ({ siteName, showCta }: { siteName: string; showCta: boolean }) => (
   <div className="container relative py-20 md:py-28 lg:py-36 pointer-events-none">
     <div className="max-w-3xl animate-fade-in-up">
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/20 border border-accent/40 backdrop-blur-sm mb-6">
@@ -40,28 +40,60 @@ const HeroOverlay = ({ siteName }: { siteName: string }) => (
       <p className="text-sm md:text-base text-primary-foreground/80 max-w-2xl mb-8 leading-relaxed">
         {SITE_INFO.description}
       </p>
-      <div className="flex flex-col sm:flex-row gap-3 pointer-events-auto">
-        <Button asChild size="xl" variant="hero">
-          <Link to="/news">
-            ดูข่าวสารล่าสุด
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-        <Button asChild size="xl" variant="outlineGold">
-          <Link to="/services/documents">บริการประชาชน</Link>
-        </Button>
-      </div>
+      {showCta && (
+        <div className="flex flex-col sm:flex-row gap-3 pointer-events-auto">
+          <Button asChild size="xl" variant="hero">
+            <Link to="/news">
+              ดูข่าวสารล่าสุด
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+          <Button asChild size="xl" variant="outlineGold">
+            <Link to="/services/documents">บริการประชาชน</Link>
+          </Button>
+        </div>
+      )}
     </div>
   </div>
 );
 
-export const HeroSection = () => {
+const heightClass = (h: SiteSettings["heroHeight"], imageOnly: boolean) => {
+  if (imageOnly) return "min-h-0";
+  switch (h) {
+    case "compact":
+      return "h-full min-h-[320px] md:min-h-[400px] lg:min-h-[460px]";
+    case "tall":
+      return "h-full min-h-[560px] md:min-h-[680px] lg:min-h-[820px]";
+    default:
+      return "h-full min-h-[480px] md:min-h-[560px] lg:min-h-[640px]";
+  }
+};
+
+const imageOnlyMaxHClass = (h: SiteSettings["heroHeight"]) => {
+  switch (h) {
+    case "compact":
+      return "max-h-[55vh]";
+    case "tall":
+      return "max-h-[92vh]";
+    default:
+      return "max-h-[80vh]";
+  }
+};
+
+interface HeroSectionProps {
+  settingsOverride?: SiteSettings;
+  previewBanners?: { src: string; alt: string; href?: string | null }[];
+}
+
+export const HeroSection = ({ settingsOverride, previewBanners }: HeroSectionProps = {}) => {
   const [slides, setSlides] = useState<BannerSlide[]>([]);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-  const { settings } = useSiteSettings();
+  const { settings: liveSettings } = useSiteSettings();
+  const settings = settingsOverride ?? liveSettings;
 
   useEffect(() => {
+    if (previewBanners) return;
     const fetchBanners = async () => {
       const nowIso = new Date().toISOString();
       const { data } = await supabase
@@ -78,7 +110,7 @@ export const HeroSection = () => {
       setSlides(filtered as BannerSlide[]);
     };
     fetchBanners();
-  }, []);
+  }, [previewBanners]);
 
   useEffect(() => {
     if (!api) return;
@@ -87,12 +119,30 @@ export const HeroSection = () => {
   }, [api]);
 
   // Build the visual list — fall back to default hero if no banners
-  const visuals: { src: string; alt: string; href?: string | null }[] =
-    slides.length > 0
+  const visuals: { src: string; alt: string; href?: string | null }[] = previewBanners
+    ? previewBanners
+    : slides.length > 0
       ? slides.map((s) => ({ src: s.image_url, alt: s.title ?? "banner", href: s.link_url }))
       : [{ src: heroImage, alt: "ภาพมุมสูงหมู่บ้านแซร์ออ" }];
   const displayVisuals = settings.heroDisplayMode === "single" ? visuals.slice(0, 1) : visuals;
   const isImageOnly = settings.heroLayout === "image-only";
+  const fitClass = settings.heroImageFit === "contain" ? "object-contain" : "object-cover";
+  const containerHeight = heightClass(settings.heroHeight, isImageOnly);
+  const imageOnlyMaxH = imageOnlyMaxHClass(settings.heroHeight);
+  const imgClass = cn(
+    "w-full",
+    isImageOnly
+      ? cn("h-auto mx-auto", imageOnlyMaxH, settings.heroImageFit === "contain" ? "object-contain" : "object-cover")
+      : cn("h-full", fitClass),
+  );
+
+  const autoplayPlugins = useMemo(
+    () =>
+      settings.heroAutoplay
+        ? [Autoplay({ delay: Math.max(1500, settings.heroAutoplayDelay), stopOnInteraction: false })]
+        : [],
+    [settings.heroAutoplay, settings.heroAutoplayDelay],
+  );
 
   return (
     <section className={cn("relative isolate overflow-hidden", isImageOnly && "bg-primary")}>
@@ -101,10 +151,10 @@ export const HeroSection = () => {
           <>
             {displayVisuals[0].href ? (
               <a href={displayVisuals[0].href} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
-                <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className={cn("w-full", isImageOnly ? "h-auto max-h-[80vh] object-contain mx-auto" : "h-full object-cover")} />
+                <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className={imgClass} />
               </a>
             ) : (
-              <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className={cn("w-full", isImageOnly ? "h-auto max-h-[80vh] object-contain mx-auto" : "h-full object-cover")} />
+              <img src={displayVisuals[0].src} alt={displayVisuals[0].alt} className={imgClass} />
             )}
             {!isImageOnly && <div className="absolute inset-0 bg-gradient-hero" />}
           </>
@@ -113,19 +163,19 @@ export const HeroSection = () => {
             <Carousel
               setApi={setApi}
               opts={{ loop: true }}
-              plugins={[Autoplay({ delay: 5500, stopOnInteraction: false })]}
+              plugins={autoplayPlugins}
               className="h-full w-full"
             >
               <CarouselContent className="h-full ml-0">
                 {displayVisuals.map((v, i) => (
                   <CarouselItem key={i} className="pl-0 basis-full">
-                    <div className={cn("relative w-full", isImageOnly ? "min-h-0" : "h-full min-h-[480px] md:min-h-[560px] lg:min-h-[640px]")}>
+                    <div className={cn("relative w-full", containerHeight)}>
                       {v.href ? (
                         <a href={v.href} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
-                          <img src={v.src} alt={v.alt} className={cn("w-full", isImageOnly ? "h-auto max-h-[80vh] object-contain mx-auto" : "h-full object-cover")} />
+                          <img src={v.src} alt={v.alt} className={imgClass} />
                         </a>
                       ) : (
-                        <img src={v.src} alt={v.alt} className={cn("w-full", isImageOnly ? "h-auto max-h-[80vh] object-contain mx-auto" : "h-full object-cover")} />
+                        <img src={v.src} alt={v.alt} className={imgClass} />
                       )}
                     </div>
                   </CarouselItem>
@@ -151,7 +201,7 @@ export const HeroSection = () => {
         )}
       </div>
 
-      {!isImageOnly && <HeroOverlay siteName={settings.siteName} />}
+      {!isImageOnly && <HeroOverlay siteName={settings.siteName} showCta={settings.heroShowCta} />}
 
       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-gold" />
     </section>
