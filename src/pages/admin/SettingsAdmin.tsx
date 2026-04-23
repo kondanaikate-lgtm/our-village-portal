@@ -199,6 +199,11 @@ const SettingsAdmin = () => {
       hero_autoplay_delay: siteSettings.hero_autoplay_delay,
       hero_show_cta: siteSettings.hero_show_cta,
       hero_image_fit: siteSettings.hero_image_fit,
+      hero_autoplay_start: siteSettings.hero_autoplay_start || null,
+      hero_autoplay_end: siteSettings.hero_autoplay_end || null,
+      hero_respect_reduced_motion: siteSettings.hero_respect_reduced_motion,
+      hero_height_aspect: siteSettings.hero_height_aspect,
+      hero_aspect_ratio: siteSettings.hero_aspect_ratio || "16/9",
       updated_by: user?.id ?? null,
     });
     setSavingSettings(false);
