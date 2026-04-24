@@ -25,6 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Calendar as CalIcon } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EventRow {
   id: string;
@@ -36,6 +38,7 @@ interface EventRow {
   location: string | null;
   category: string | null;
   is_published: boolean;
+  image_urls?: string[] | null;
 }
 
 const empty = {
@@ -48,6 +51,7 @@ const empty = {
   location: "",
   category: "",
   is_published: true,
+  image_urls: [] as string[],
 };
 
 const toLocalInput = (iso: string | null) => {
@@ -58,6 +62,7 @@ const toLocalInput = (iso: string | null) => {
 };
 
 const EventsAdmin = () => {
+  const { user } = useAuth();
   const [events, setEvents] = useState<EventRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -93,6 +98,7 @@ const EventsAdmin = () => {
       location: e.location || "",
       category: e.category || "",
       is_published: e.is_published,
+      image_urls: e.image_urls ?? [],
     });
     setOpen(true);
   };
@@ -111,6 +117,7 @@ const EventsAdmin = () => {
       location: form.location || null,
       category: form.category || null,
       is_published: form.is_published,
+      image_urls: form.image_urls,
     };
     const { error } = form.id
       ? await supabase.from("events").update(payload).eq("id", form.id)
@@ -239,6 +246,16 @@ const EventsAdmin = () => {
                   />
                   <span className="text-sm">เผยแพร่</span>
                 </label>
+              </div>
+              <div>
+                <MultiImageUploader
+                  value={form.image_urls}
+                  onChange={(urls) => setForm({ ...form, image_urls: urls })}
+                  bucket="site-assets"
+                  folder={`events/${user?.id ?? "anon"}`}
+                  label="รูปภาพกิจกรรม (เลือกได้หลายรูป)"
+                  maxSizeMB={8}
+                />
               </div>
             </div>
             <DialogFooter>

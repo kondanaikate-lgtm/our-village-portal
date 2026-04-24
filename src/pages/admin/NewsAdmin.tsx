@@ -44,6 +44,7 @@ import { toast } from "sonner";
 import { slugify } from "@/lib/slugify";
 import { useAuth } from "@/contexts/AuthContext";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
 
 interface Category {
   id: string;
@@ -64,6 +65,7 @@ interface NewsRow {
   published_at: string | null;
   view_count: number;
   created_at: string;
+  image_urls?: string[] | null;
 }
 
 type FilterStatus = "all" | "published" | "draft";
@@ -78,6 +80,7 @@ interface FormState {
   thumbnail_url: string | null;
   is_published: boolean;
   is_pinned: boolean;
+  image_urls: string[];
 }
 
 const emptyForm: FormState = {
@@ -89,6 +92,7 @@ const emptyForm: FormState = {
   thumbnail_url: null,
   is_published: false,
   is_pinned: false,
+  image_urls: [],
 };
 
 const NONE_CATEGORY = "__none__";
@@ -115,7 +119,7 @@ const NewsAdmin = () => {
     const [{ data: newsData, error: newsErr }, { data: catData }] = await Promise.all([
       supabase
         .from("news")
-        .select("id,title,slug,excerpt,content,thumbnail_url,category_id,is_published,is_pinned,published_at,view_count,created_at")
+        .select("id,title,slug,excerpt,content,thumbnail_url,category_id,is_published,is_pinned,published_at,view_count,created_at,image_urls")
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false }),
       supabase.from("news_categories").select("id,name,slug").order("order_index"),
@@ -158,6 +162,7 @@ const NewsAdmin = () => {
       thumbnail_url: row.thumbnail_url,
       is_published: row.is_published,
       is_pinned: row.is_pinned,
+      image_urls: row.image_urls ?? [],
     });
     setSlugTouched(true);
     setDialogOpen(true);
@@ -209,6 +214,7 @@ const NewsAdmin = () => {
       is_pinned: form.is_pinned,
       published_at: form.is_published ? new Date().toISOString() : null,
       author_id: user?.id ?? null,
+      image_urls: form.image_urls,
     };
 
     const { error } = form.id
@@ -524,6 +530,18 @@ const NewsAdmin = () => {
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Upload className="h-3 w-3" /> ไฟล์ภาพไม่เกิน 5MB
               </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <MultiImageUploader
+                value={form.image_urls}
+                onChange={(urls) => setForm((f) => ({ ...f, image_urls: urls }))}
+                bucket="news-images"
+                folder={`gallery/${user?.id ?? "anon"}`}
+                label="รูปประกอบเพิ่มเติม (เลือกหลายรูปได้)"
+                helpText="รองรับสูงสุด 8MB ต่อไฟล์ • แสดงเป็นแกลเลอรี่ในหน้าข่าว"
+                maxSizeMB={8}
+              />
             </div>
 
             <div className="grid sm:grid-cols-2 gap-3 pt-2 border-t border-border">

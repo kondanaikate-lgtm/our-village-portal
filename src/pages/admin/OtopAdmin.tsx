@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
 
 interface OtopRow {
   id: string;
@@ -60,6 +61,7 @@ interface OtopRow {
   is_active: boolean;
   order_index: number;
   created_at: string;
+  image_urls?: string[] | null;
 }
 
 interface FormState {
@@ -73,6 +75,7 @@ interface FormState {
   contact_phone: string;
   is_active: boolean;
   order_index: number;
+  image_urls: string[];
 }
 
 const emptyForm: FormState = {
@@ -85,6 +88,7 @@ const emptyForm: FormState = {
   contact_phone: "",
   is_active: true,
   order_index: 0,
+  image_urls: [],
 };
 
 const OtopAdmin = () => {
@@ -142,6 +146,7 @@ const OtopAdmin = () => {
       contact_phone: row.contact_phone ?? "",
       is_active: row.is_active,
       order_index: row.order_index,
+      image_urls: row.image_urls ?? [],
     });
     setDialogOpen(true);
   };
@@ -185,6 +190,7 @@ const OtopAdmin = () => {
       contact_phone: form.contact_phone.trim() || null,
       is_active: form.is_active,
       order_index: Number.isFinite(form.order_index) ? form.order_index : 0,
+      image_urls: form.image_urls,
     };
     const { error } = form.id
       ? await supabase.from("otop_products").update(payload).eq("id", form.id)
@@ -470,6 +476,18 @@ const OtopAdmin = () => {
                   </label>
                 </Button>
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <MultiImageUploader
+                value={form.image_urls}
+                onChange={(urls) => setForm((f) => ({ ...f, image_urls: urls }))}
+                bucket="site-assets"
+                folder={`otop/${user?.id ?? "anon"}/gallery`}
+                label="รูปสินค้าเพิ่มเติม (มุมมองอื่น ๆ)"
+                helpText="รองรับสูงสุด 8MB ต่อไฟล์ • แสดงเป็นแกลเลอรี่ในหน้าสินค้า"
+                maxSizeMB={8}
+              />
             </div>
 
             <div className="flex items-center justify-between rounded-md border border-border p-3">
