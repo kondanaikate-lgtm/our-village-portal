@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { MultiImageUploader } from "@/components/admin/MultiImageUploader";
 
 interface OtopRow {
   id: string;
@@ -60,6 +61,7 @@ interface OtopRow {
   is_active: boolean;
   order_index: number;
   created_at: string;
+  image_urls?: string[] | null;
 }
 
 interface FormState {
@@ -73,6 +75,7 @@ interface FormState {
   contact_phone: string;
   is_active: boolean;
   order_index: number;
+  image_urls: string[];
 }
 
 const emptyForm: FormState = {
@@ -85,6 +88,7 @@ const emptyForm: FormState = {
   contact_phone: "",
   is_active: true,
   order_index: 0,
+  image_urls: [],
 };
 
 const OtopAdmin = () => {
@@ -142,6 +146,7 @@ const OtopAdmin = () => {
       contact_phone: row.contact_phone ?? "",
       is_active: row.is_active,
       order_index: row.order_index,
+      image_urls: row.image_urls ?? [],
     });
     setDialogOpen(true);
   };
@@ -185,6 +190,7 @@ const OtopAdmin = () => {
       contact_phone: form.contact_phone.trim() || null,
       is_active: form.is_active,
       order_index: Number.isFinite(form.order_index) ? form.order_index : 0,
+      image_urls: form.image_urls,
     };
     const { error } = form.id
       ? await supabase.from("otop_products").update(payload).eq("id", form.id)
