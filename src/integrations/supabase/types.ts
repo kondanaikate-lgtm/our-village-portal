@@ -201,6 +201,7 @@ export type Database = {
           description: string | null
           end_at: string | null
           id: string
+          image_urls: string[]
           is_published: boolean
           location: string | null
           start_at: string
@@ -216,6 +217,7 @@ export type Database = {
           description?: string | null
           end_at?: string | null
           id?: string
+          image_urls?: string[]
           is_published?: boolean
           location?: string | null
           start_at: string
@@ -231,6 +233,7 @@ export type Database = {
           description?: string | null
           end_at?: string | null
           id?: string
+          image_urls?: string[]
           is_published?: boolean
           location?: string | null
           start_at?: string
@@ -355,6 +358,7 @@ export type Database = {
           excerpt: string | null
           expired_at: string | null
           id: string
+          image_urls: string[]
           is_pinned: boolean
           is_published: boolean
           published_at: string | null
@@ -372,6 +376,7 @@ export type Database = {
           excerpt?: string | null
           expired_at?: string | null
           id?: string
+          image_urls?: string[]
           is_pinned?: boolean
           is_published?: boolean
           published_at?: string | null
@@ -389,6 +394,7 @@ export type Database = {
           excerpt?: string | null
           expired_at?: string | null
           id?: string
+          image_urls?: string[]
           is_pinned?: boolean
           is_published?: boolean
           published_at?: string | null
@@ -443,6 +449,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          image_urls: string[]
           is_active: boolean
           name: string
           order_index: number
@@ -457,6 +464,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           is_active?: boolean
           name: string
           order_index?: number
@@ -471,6 +479,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
           is_active?: boolean
           name?: string
           order_index?: number
