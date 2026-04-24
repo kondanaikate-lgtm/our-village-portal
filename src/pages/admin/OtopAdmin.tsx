@@ -478,6 +478,18 @@ const OtopAdmin = () => {
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <MultiImageUploader
+                value={form.image_urls}
+                onChange={(urls) => setForm((f) => ({ ...f, image_urls: urls }))}
+                bucket="site-assets"
+                folder={`otop/${user?.id ?? "anon"}/gallery`}
+                label="รูปสินค้าเพิ่มเติม (มุมมองอื่น ๆ)"
+                helpText="รองรับสูงสุด 8MB ต่อไฟล์ • แสดงเป็นแกลเลอรี่ในหน้าสินค้า"
+                maxSizeMB={8}
+              />
+            </div>
+
             <div className="flex items-center justify-between rounded-md border border-border p-3">
               <div>
                 <Label htmlFor="o-active" className="cursor-pointer">แสดงบนเว็บไซต์</Label>
