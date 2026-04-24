@@ -532,6 +532,18 @@ const NewsAdmin = () => {
               </p>
             </div>
 
+            <div className="space-y-1.5">
+              <MultiImageUploader
+                value={form.image_urls}
+                onChange={(urls) => setForm((f) => ({ ...f, image_urls: urls }))}
+                bucket="news-images"
+                folder={`gallery/${user?.id ?? "anon"}`}
+                label="รูปประกอบเพิ่มเติม (เลือกหลายรูปได้)"
+                helpText="รองรับสูงสุด 8MB ต่อไฟล์ • แสดงเป็นแกลเลอรี่ในหน้าข่าว"
+                maxSizeMB={8}
+              />
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-3 pt-2 border-t border-border">
               <label className="flex items-center justify-between rounded-md border border-border p-3 cursor-pointer">
                 <div>
