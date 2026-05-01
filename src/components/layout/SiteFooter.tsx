@@ -2,10 +2,17 @@ import { Link } from "react-router-dom";
 import { MapPin, Phone, Mail, Facebook, MessageCircle } from "lucide-react";
 import { SITE_INFO } from "@/config/site";
 import { useSiteSettings } from "@/hooks/use-site-settings";
+import { useVillageInfo } from "@/hooks/use-village-info";
+import { useMemo } from "react";
+
+const FOOTER_KEYS = ["footer-about", "contact-info"];
 
 export const SiteFooter = () => {
   const year = new Date().getFullYear() + 543;
   const { settings } = useSiteSettings();
+  const { data: vi } = useVillageInfo(FOOTER_KEYS);
+  const aboutText = vi["footer-about"]?.content?.trim();
+  const contactInfo = vi["contact-info"]?.content?.trim();
 
   return (
     <footer className="bg-primary-deep text-primary-foreground mt-16 ribbon-gold">
@@ -30,9 +37,16 @@ export const SiteFooter = () => {
                 </p>
               </div>
             </div>
-            <p className="text-sm text-primary-foreground/80 leading-relaxed mb-4 max-w-md">
-              {SITE_INFO.description}
-            </p>
+            {aboutText ? (
+              <div
+                className="text-sm text-primary-foreground/80 leading-relaxed mb-4 max-w-md prose-footer"
+                dangerouslySetInnerHTML={{ __html: aboutText }}
+              />
+            ) : (
+              <p className="text-sm text-primary-foreground/80 leading-relaxed mb-4 max-w-md">
+                {SITE_INFO.description}
+              </p>
+            )}
             <div className="space-y-2 text-sm">
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5 text-accent shrink-0" />

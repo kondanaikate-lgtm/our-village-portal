@@ -11,6 +11,8 @@ import { CalendarDays, MapPin, Clock } from "lucide-react";
 import { format, isSameDay, startOfMonth, endOfMonth } from "date-fns";
 import { th } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface EventItem {
   id: string;
@@ -22,6 +24,7 @@ interface EventItem {
   location: string | null;
   category: string | null;
   cover_image_url: string | null;
+  image_urls?: string[] | null;
 }
 
 const Events = () => {
@@ -29,6 +32,7 @@ const Events = () => {
   const [loading, setLoading] = useState(true);
   const [month, setMonth] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [detailEvent, setDetailEvent] = useState<EventItem | null>(null);
 
   useEffect(() => {
     document.title = "ปฏิทินกิจกรรม | หมู่บ้านแซร์ออ ม.2";
@@ -105,7 +109,7 @@ const Events = () => {
                     ไม่มีกิจกรรมในวันนี้
                   </p>
                 ) : (
-                  eventsForSelected.map((e) => <EventCard key={e.id} event={e} />)
+                  eventsForSelected.map((e) => <EventCard key={e.id} event={e} onClick={() => setDetailEvent(e)} />)
                 )}
               </div>
             </div>
@@ -121,20 +125,27 @@ const Events = () => {
                 ไม่มีกิจกรรมในเดือนนี้
               </p>
             ) : (
-              events.map((e) => <EventCard key={e.id} event={e} />)
+              events.map((e) => <EventCard key={e.id} event={e} onClick={() => setDetailEvent(e)} />)
             )}
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={!!detailEvent} onOpenChange={(o) => !o && setDetailEvent(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          {detailEvent && <EventDetail event={detailEvent} />}
+        </DialogContent>
+      </Dialog>
     </SiteLayout>
   );
 };
 
-const EventCard = ({ event }: { event: EventItem }) => {
+const EventCard = ({ event, onClick }: { event: EventItem; onClick?: () => void }) => {
   const start = new Date(event.start_at);
   const end = event.end_at ? new Date(event.end_at) : null;
+  const photoCount = (event.image_urls?.length ?? 0) + (event.cover_image_url ? 1 : 0);
   return (
-    <Card className="hover:shadow-md transition-base">
+    <Card className="hover:shadow-md transition-base cursor-pointer" onClick={onClick}>
       <CardContent className="p-4 flex gap-4">
         <div className="shrink-0 w-16 text-center bg-primary/10 text-primary rounded-md py-2">
           <div className="text-2xl font-display font-bold leading-none">
@@ -147,9 +158,10 @@ const EventCard = ({ event }: { event: EventItem }) => {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <h4 className="font-semibold text-foreground">{event.title}</h4>
-            {event.category && (
-              <Badge variant="secondary">{event.category}</Badge>
-            )}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {photoCount > 0 && <Badge variant="outline" className="text-xs">{photoCount} รูป</Badge>}
+              {event.category && <Badge variant="secondary">{event.category}</Badge>}
+            </div>
           </div>
           {event.description && (
             <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -173,6 +185,61 @@ const EventCard = ({ event }: { event: EventItem }) => {
         </div>
       </CardContent>
     </Card>
+  );
+};
+
+const EventDetail = ({ event }: { event: EventItem }) => {
+  const start = new Date(event.start_at);
+  const end = event.end_at ? new Date(event.end_at) : null;
+  const gallery = [
+    ...(event.cover_image_url ? [event.cover_image_url] : []),
+    ...((event.image_urls ?? []).filter((u) => u && u !== event.cover_image_url)),
+  ];
+  return (
+    <div className="space-y-4">
+      <DialogHeader>
+        <DialogTitle className="font-display text-xl">{event.title}</DialogTitle>
+      </DialogHeader>
+      <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+        <span className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4" />{format(start, "d MMMM yyyy", { locale: th })}</span>
+        <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" />{event.all_day ? "ทั้งวัน" : `${format(start, "HH:mm")}${end ? ` - ${format(end, "HH:mm")}` : ""}`}</span>
+        {event.location && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" />{event.location}</span>}
+        {event.category && <Badge variant="secondary">{event.category}</Badge>}
+      </div>
+      {gallery.length > 0 && (
+        <div className="space-y-2">
+          <Carousel opts={{ loop: gallery.length > 1 }}>
+            <CarouselContent>
+              {gallery.map((url, i) => (
+                <CarouselItem key={`${url}-${i}`}>
+                  <div className="aspect-video bg-muted rounded-md overflow-hidden">
+                    <img src={url} alt={`${event.title} ${i + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {gallery.length > 1 && (
+              <>
+                <CarouselPrevious className="left-2" />
+                <CarouselNext className="right-2" />
+              </>
+            )}
+          </Carousel>
+          {gallery.length > 1 && (
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+              {gallery.map((url, i) => (
+                <div key={`${url}-thumb-${i}`} className="aspect-square rounded overflow-hidden border border-border">
+                  <img src={url} alt={`thumb-${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {event.description && (
+        <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{event.description}</div>
+      )}
+    </div>
   );
 };
 

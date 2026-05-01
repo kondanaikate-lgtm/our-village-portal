@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Facebook, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Clock, Facebook, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_INFO } from "@/config/site";
+import { useVillageInfo } from "@/hooks/use-village-info";
 
 interface SocialLink {
   id: string;
@@ -23,6 +24,10 @@ const iconFor = (name: string | null, platform: string) => {
 
 const Contact = () => {
   const [links, setLinks] = useState<SocialLink[]>([]);
+  const { data: vi } = useVillageInfo(["contact-info", "contact-hours", "contact-map"]);
+  const contactInfo = vi["contact-info"]?.content?.trim();
+  const contactHours = vi["contact-hours"]?.content?.trim();
+  const contactMap = vi["contact-map"]?.content?.trim();
 
   useEffect(() => {
     document.title = `ติดต่อเรา | ${SITE_INFO.villageName}`;
@@ -49,12 +54,23 @@ const Contact = () => {
           <div className="space-y-4">
             <Card className="p-6 border-border/60">
               <h2 className="font-display font-semibold text-xl mb-4">ข้อมูลติดต่อ</h2>
-              <div className="space-y-4 text-sm">
-                <div className="flex gap-3"><MapPin className="h-5 w-5 text-primary shrink-0" /><span>{SITE_INFO.fullAddress}</span></div>
-                <a href={`tel:${SITE_INFO.headman.phoneRaw}`} className="flex gap-3 hover:text-primary"><Phone className="h-5 w-5 text-primary shrink-0" /><span>{SITE_INFO.headman.phone}</span></a>
-                <div className="flex gap-3"><Mail className="h-5 w-5 text-primary shrink-0" /><span>contact@village.local</span></div>
-              </div>
+              {contactInfo ? (
+                <div className="text-sm prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: contactInfo }} />
+              ) : (
+                <div className="space-y-4 text-sm">
+                  <div className="flex gap-3"><MapPin className="h-5 w-5 text-primary shrink-0" /><span>{SITE_INFO.fullAddress}</span></div>
+                  <a href={`tel:${SITE_INFO.headman.phoneRaw}`} className="flex gap-3 hover:text-primary"><Phone className="h-5 w-5 text-primary shrink-0" /><span>{SITE_INFO.headman.phone}</span></a>
+                  <div className="flex gap-3"><Mail className="h-5 w-5 text-primary shrink-0" /><span>contact@village.local</span></div>
+                </div>
+              )}
             </Card>
+
+            {contactHours && (
+              <Card className="p-6 border-border/60">
+                <h2 className="font-display font-semibold text-xl mb-3 flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /> เวลาทำการ</h2>
+                <div className="text-sm prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: contactHours }} />
+              </Card>
+            )}
 
             <Card className="p-6 border-border/60">
               <h2 className="font-display font-semibold text-xl mb-2">ผู้ใหญ่บ้าน</h2>
@@ -65,6 +81,21 @@ const Contact = () => {
           </div>
 
           <div className="space-y-4">
+            {contactMap && (
+              <Card className="p-3 border-border/60 overflow-hidden">
+                {/^https?:\/\//.test(contactMap) ? (
+                  <iframe
+                    src={contactMap}
+                    title="map"
+                    className="w-full h-72 rounded-md border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                ) : (
+                  <div className="[&_iframe]:w-full [&_iframe]:h-72 [&_iframe]:rounded-md" dangerouslySetInnerHTML={{ __html: contactMap }} />
+                )}
+              </Card>
+            )}
             {links.length > 0 && (
               <Card className="p-6 border-border/60">
                 <h2 className="font-display font-semibold text-xl mb-4">ช่องทางออนไลน์</h2>
