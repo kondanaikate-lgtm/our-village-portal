@@ -30,6 +30,10 @@ const INFO_SECTIONS = [
   { key: "info-center", title: "ศูนย์ข้อมูลข่าวสาร" },
   { key: "policy", title: "นโยบายเว็บไซต์" },
   { key: "manual", title: "คู่มือบริการ" },
+  { key: "footer-about", title: "ส่วนท้าย: ข้อความแนะนำหมู่บ้าน" },
+  { key: "contact-info", title: "ติดต่อ: ข้อมูลติดต่อ (ที่อยู่/โทร/อีเมล)" },
+  { key: "contact-hours", title: "ติดต่อ: เวลาทำการ" },
+  { key: "contact-map", title: "ติดต่อ: ลิงก์/ฝัง Google Maps (วาง iframe หรือ URL)" },
 ];
 
 interface InfoRow {
