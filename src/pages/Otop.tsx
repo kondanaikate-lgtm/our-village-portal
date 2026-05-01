@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_INFO } from "@/config/site";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface Product {
   id: string;
@@ -16,6 +17,7 @@ interface Product {
   image_url: string | null;
   contact_name: string | null;
   contact_phone: string | null;
+  image_urls?: string[] | null;
 }
 
 const Otop = () => {
@@ -27,7 +29,7 @@ const Otop = () => {
     document.title = `สินค้า OTOP | ${SITE_INFO.villageName}`;
     supabase
       .from("otop_products")
-      .select("id,name,description,price,unit,image_url,contact_name,contact_phone")
+      .select("id,name,description,price,unit,image_url,contact_name,contact_phone,image_urls")
       .eq("is_active", true)
       .order("order_index", { ascending: true })
       .then(({ data }) => {
@@ -77,11 +79,33 @@ const Otop = () => {
             </Card>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((p) => (
+              {filtered.map((p) => {
+                const gallery = [
+                  ...(p.image_url ? [p.image_url] : []),
+                  ...((p.image_urls ?? []).filter((u) => u && u !== p.image_url)),
+                ];
+                return (
                 <Card key={p.id} className="overflow-hidden hover:shadow-elegant transition-smooth border-border/60 group">
-                  <div className="aspect-[4/3] bg-secondary overflow-hidden">
-                    {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} loading="lazy" className="h-full w-full object-cover group-hover:scale-105 transition-smooth" />
+                  <div className="aspect-[4/3] bg-secondary overflow-hidden relative">
+                    {gallery.length > 1 ? (
+                      <Carousel className="h-full" opts={{ loop: true }}>
+                        <CarouselContent className="h-full">
+                          {gallery.map((url, i) => (
+                            <CarouselItem key={`${url}-${i}`} className="h-full">
+                              <div className="aspect-[4/3] h-full w-full">
+                                <img src={url} alt={`${p.name} ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="left-2 h-7 w-7" />
+                        <CarouselNext className="right-2 h-7 w-7" />
+                        <div className="absolute bottom-2 right-2 bg-background/80 text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                          {gallery.length} รูป
+                        </div>
+                      </Carousel>
+                    ) : gallery.length === 1 ? (
+                      <img src={gallery[0]} alt={p.name} loading="lazy" className="h-full w-full object-cover group-hover:scale-105 transition-smooth" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center bg-gradient-section">
                         <ShoppingBag className="h-14 w-14 text-muted-foreground/40" />
@@ -111,7 +135,8 @@ const Otop = () => {
                     {p.contact_name && <p className="text-xs text-muted-foreground">ผู้ติดต่อ: {p.contact_name}</p>}
                   </div>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
