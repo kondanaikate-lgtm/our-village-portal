@@ -31,26 +31,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Set up listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
+      // Auto-clear session if refresh fails to prevent retry loops
+      if (event === "TOKEN_REFRESHED" && !sess) {
+        supabase.auth.signOut().catch(() => {});
+        setSession(null);
+        setUser(null);
+        setRoles([]);
+        return;
+      }
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
-        // Defer to avoid deadlocks
         setTimeout(() => fetchRoles(sess.user.id), 0);
       } else {
         setRoles([]);
       }
     });
 
-    // Then check existing session
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) {
-        fetchRoles(sess.user.id);
-      }
-      setLoading(false);
-    });
+    // Then check existing session — clear bad refresh tokens automatically
+    supabase.auth.getSession()
+      .then(({ data: { session: sess }, error }) => {
+        if (error) {
+          // Invalid refresh token / network — clear local session, no retry loop
+          supabase.auth.signOut().catch(() => {});
+          setSession(null);
+          setUser(null);
+        } else {
+          setSession(sess);
+          setUser(sess?.user ?? null);
+          if (sess?.user) fetchRoles(sess.user.id);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        supabase.auth.signOut().catch(() => {});
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+      });
 
     return () => subscription.unsubscribe();
   }, []);

@@ -30,8 +30,12 @@ import ComplaintsAdmin from "./pages/admin/ComplaintsAdmin.tsx";
 import FaqsAdmin from "./pages/admin/FaqsAdmin.tsx";
 import GalleryAdmin from "./pages/admin/GalleryAdmin.tsx";
 import EventsAdmin from "./pages/admin/EventsAdmin.tsx";
-import SubscribersAdmin from "./pages/admin/SubscribersAdmin.tsx";
 import SettingsAdmin from "./pages/admin/SettingsAdmin.tsx";
+import AuditLogsAdmin from "./pages/admin/AuditLogsAdmin.tsx";
+import ItaPage from "./pages/ItaPage.tsx";
+import PolicyPage from "./pages/PolicyPage.tsx";
+import ManualPage from "./pages/ManualPage.tsx";
+import InfoCenterPage from "./pages/InfoCenterPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -64,10 +68,10 @@ const App = () => (
             <Route path="/transparency/plans" element={<VillageInfoPage />} />
             <Route path="/transparency/budget" element={<VillageInfoPage />} />
             <Route path="/transparency/reports" element={<VillageInfoPage />} />
-            <Route path="/ita" element={<VillageInfoPage />} />
-            <Route path="/info-center" element={<VillageInfoPage />} />
-            <Route path="/policy" element={<VillageInfoPage />} />
-            <Route path="/manual" element={<VillageInfoPage />} />
+            <Route path="/ita" element={<ItaPage />} />
+            <Route path="/info-center" element={<InfoCenterPage />} />
+            <Route path="/policy" element={<PolicyPage />} />
+            <Route path="/manual" element={<ManualPage />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<Faq />} />
             <Route path="/complaints" element={<Complaints />} />
@@ -87,8 +91,8 @@ const App = () => (
             <Route path="/admin/faqs" element={wrapAdmin(<FaqsAdmin />)} />
             <Route path="/admin/gallery" element={wrapAdmin(<GalleryAdmin />)} />
             <Route path="/admin/events" element={wrapAdmin(<EventsAdmin />)} />
-            <Route path="/admin/subscribers" element={wrapAdmin(<SubscribersAdmin />)} />
             <Route path="/admin/settings" element={wrapAdmin(<SettingsAdmin />)} />
+            <Route path="/admin/audit-logs" element={wrapAdmin(<AuditLogsAdmin />)} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
