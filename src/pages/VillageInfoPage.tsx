@@ -6,6 +6,8 @@ import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_INFO } from "@/config/site";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { cn } from "@/lib/utils";
 
 const PAGE_MAP: Record<string, { key: string; title: string; eyebrow: string }> = {
   "/about/history": { key: "history", title: "ประวัติความเป็นมา", eyebrow: "เกี่ยวกับหมู่บ้าน" },
@@ -30,6 +32,7 @@ interface VillageInfoRow {
 const VillageInfoPage = () => {
   const { pathname } = useLocation();
   const page = PAGE_MAP[pathname] ?? PAGE_MAP["/transparency"];
+  const { settings } = useSiteSettings();
   const [row, setRow] = useState<VillageInfoRow | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,15 +54,20 @@ const VillageInfoPage = () => {
 
   return (
     <SiteLayout>
-      <section className="bg-gradient-primary text-primary-foreground py-12 md:py-16 ribbon-gold">
-        <div className="container">
+      <section className={cn(
+        "py-12 md:py-16",
+        settings.aboutHeroStyle === "minimal"
+          ? "bg-secondary border-b border-border"
+          : "bg-gradient-primary text-primary-foreground ribbon-gold",
+      )}>
+        <div className={cn("container", settings.aboutAlign === "center" && "text-center")}>
           <p className="text-xs uppercase tracking-widest text-accent mb-2">{page.eyebrow}</p>
           <h1 className="font-display font-bold text-3xl md:text-4xl">{row?.title || page.title}</h1>
         </div>
       </section>
 
       <section className="py-10 md:py-14 bg-background">
-        <div className="container max-w-4xl">
+        <div className={cn("container max-w-4xl", settings.aboutAlign === "center" && "text-center")}>
           {loading ? (
             <div className="py-16 text-center text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin inline mr-2" />กำลังโหลด...</div>
           ) : html ? (
