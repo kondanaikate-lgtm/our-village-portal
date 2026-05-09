@@ -35,6 +35,7 @@ const NAV = [
   { to: "/admin/complaints", label: "ร้องเรียน", icon: MessageSquareWarning },
   { to: "/admin/faqs", label: "คำถามที่พบบ่อย", icon: HelpCircle },
   { to: "/admin/settings", label: "ตั้งค่าเว็บไซต์", icon: Settings },
+  { to: "/admin/ita-indicators", label: "ตัวชี้วัด ITA", icon: ShieldCheck },
   { to: "/admin/audit-logs", label: "บันทึกการใช้งาน", icon: ScrollText },
 ];
 
