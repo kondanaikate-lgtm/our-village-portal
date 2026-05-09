@@ -466,6 +466,103 @@ const SettingsAdmin = () => {
             </Card>
           </TabsContent>
           <TabsContent value="info" className="space-y-4">
+
+          </TabsContent>
+          <TabsContent value="layout" className="space-y-4">
+            <Card className="p-4 md:p-5 space-y-6">
+              <div>
+                <h3 className="font-display font-semibold text-lg mb-3">ส่วนท้าย (Footer)</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>จำนวนคอลัมน์</Label>
+                    <Select value={String(siteSettings.footer_columns)} onValueChange={(v) => setSiteSettings((s) => ({ ...s, footer_columns: Number(v) }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 คอลัมน์</SelectItem>
+                        <SelectItem value="2">2 คอลัมน์</SelectItem>
+                        <SelectItem value="3">3 คอลัมน์</SelectItem>
+                        <SelectItem value="4">4 คอลัมน์ (ค่าเริ่มต้น)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>การจัดวาง</Label>
+                    <Select value={siteSettings.footer_align} onValueChange={(v) => setSiteSettings((s) => ({ ...s, footer_align: v as "left" | "center" }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="left">ชิดซ้าย</SelectItem>
+                        <SelectItem value="center">กึ่งกลาง</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-3 mt-4">
+                  <label className="flex items-center gap-2 text-sm"><Switch checked={siteSettings.footer_show_quicklinks} onCheckedChange={(v) => setSiteSettings((s) => ({ ...s, footer_show_quicklinks: v }))} /> แสดงลิงก์ด่วน</label>
+                  <label className="flex items-center gap-2 text-sm"><Switch checked={siteSettings.footer_show_headman} onCheckedChange={(v) => setSiteSettings((s) => ({ ...s, footer_show_headman: v }))} /> แสดงผู้ใหญ่บ้าน</label>
+                  <label className="flex items-center gap-2 text-sm"><Switch checked={siteSettings.footer_show_social} onCheckedChange={(v) => setSiteSettings((s) => ({ ...s, footer_show_social: v }))} /> แสดงโซเชียล</label>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-display font-semibold text-lg mb-3">หน้าติดต่อ (Contact)</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>โครงสร้าง</Label>
+                    <Select value={siteSettings.contact_layout} onValueChange={(v) => setSiteSettings((s) => ({ ...s, contact_layout: v as "two-column" | "stacked" }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="two-column">แบบสองคอลัมน์ (ข้อมูล + แผนที่)</SelectItem>
+                        <SelectItem value="stacked">แบบเรียงคอลัมน์เดียว</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>ตำแหน่งแผนที่</Label>
+                    <Select value={siteSettings.contact_map_position} onValueChange={(v) => setSiteSettings((s) => ({ ...s, contact_map_position: v as "right" | "below" }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="right">ด้านขวา</SelectItem>
+                        <SelectItem value="below">ด้านล่าง</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-display font-semibold text-lg mb-3">หน้าเกี่ยวกับ / ข้อมูลสาธารณะ</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>การจัดวางข้อความ</Label>
+                    <Select value={siteSettings.about_align} onValueChange={(v) => setSiteSettings((s) => ({ ...s, about_align: v as "left" | "center" }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="left">ชิดซ้าย</SelectItem>
+                        <SelectItem value="center">กึ่งกลาง</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>สไตล์ส่วนหัว (Hero)</Label>
+                    <Select value={siteSettings.about_hero_style} onValueChange={(v) => setSiteSettings((s) => ({ ...s, about_hero_style: v as "gradient" | "minimal" }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gradient">ไล่สีหลัก (gradient)</SelectItem>
+                        <SelectItem value="minimal">มินิมอล (โทนอ่อน)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button variant="royal" onClick={saveSiteSettings} disabled={savingSettings}>
+                  {savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} บันทึกการตั้งค่า
+                </Button>
+              </div>
+            </Card>
+          </TabsContent>
+          <TabsContent value="info-keep-old" className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
               <Card className="p-2 h-fit">
                 {INFO_SECTIONS.map((section) => (
