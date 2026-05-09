@@ -308,7 +308,12 @@ const SettingsAdmin = () => {
         <div className="py-16 text-center text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin inline mr-2" />กำลังโหลด...</div>
       ) : (
         <Tabs defaultValue="site" className="space-y-4">
-          <TabsList><TabsTrigger value="site">ตั้งค่าหลัก</TabsTrigger><TabsTrigger value="info">เนื้อหาเว็บไซต์</TabsTrigger><TabsTrigger value="social">Social Links</TabsTrigger></TabsList>
+          <TabsList>
+            <TabsTrigger value="site">ตั้งค่าหลัก</TabsTrigger>
+            <TabsTrigger value="layout">เลย์เอาต์</TabsTrigger>
+            <TabsTrigger value="info">เนื้อหาเว็บไซต์</TabsTrigger>
+            <TabsTrigger value="social">Social Links</TabsTrigger>
+          </TabsList>
           <TabsContent value="site" className="space-y-4">
             <Card className="p-4 md:p-5 space-y-5">
               <div className="grid gap-4 md:grid-cols-2">
