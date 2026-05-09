@@ -465,9 +465,6 @@ const SettingsAdmin = () => {
               <div className="flex justify-end"><Button variant="royal" onClick={saveSiteSettings} disabled={savingSettings || uploadingLogo}>{savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} บันทึกการตั้งค่า</Button></div>
             </Card>
           </TabsContent>
-          <TabsContent value="info" className="space-y-4">
-
-          </TabsContent>
           <TabsContent value="layout" className="space-y-4">
             <Card className="p-4 md:p-5 space-y-6">
               <div>
@@ -562,7 +559,7 @@ const SettingsAdmin = () => {
               </div>
             </Card>
           </TabsContent>
-          <TabsContent value="info-keep-old" className="space-y-4">
+          <TabsContent value="info" className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
               <Card className="p-2 h-fit">
                 {INFO_SECTIONS.map((section) => (
