@@ -32,6 +32,7 @@ import GalleryAdmin from "./pages/admin/GalleryAdmin.tsx";
 import EventsAdmin from "./pages/admin/EventsAdmin.tsx";
 import SettingsAdmin from "./pages/admin/SettingsAdmin.tsx";
 import AuditLogsAdmin from "./pages/admin/AuditLogsAdmin.tsx";
+import ItaIndicatorsAdmin from "./pages/admin/ItaIndicatorsAdmin.tsx";
 import ItaPage from "./pages/ItaPage.tsx";
 import PolicyPage from "./pages/PolicyPage.tsx";
 import ManualPage from "./pages/ManualPage.tsx";
@@ -93,6 +94,7 @@ const App = () => (
             <Route path="/admin/events" element={wrapAdmin(<EventsAdmin />)} />
             <Route path="/admin/settings" element={wrapAdmin(<SettingsAdmin />)} />
             <Route path="/admin/audit-logs" element={wrapAdmin(<AuditLogsAdmin />)} />
+            <Route path="/admin/ita-indicators" element={wrapAdmin(<ItaIndicatorsAdmin />)} />
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
