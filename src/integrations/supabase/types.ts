@@ -349,6 +349,45 @@ export type Database = {
           },
         ]
       }
+      ita_indicators: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          link_url: string | null
+          order_index: number
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          link_url?: string | null
+          order_index?: number
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          link_url?: string | null
+          order_index?: number
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           author_id: string | null
@@ -563,6 +602,15 @@ export type Database = {
       }
       site_settings: {
         Row: {
+          about_align: string
+          about_hero_style: string
+          contact_layout: string
+          contact_map_position: string
+          footer_align: string
+          footer_columns: number
+          footer_show_headman: boolean
+          footer_show_quicklinks: boolean
+          footer_show_social: boolean
           hero_aspect_ratio: string
           hero_autoplay: boolean
           hero_autoplay_delay: number
@@ -582,6 +630,15 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          about_align?: string
+          about_hero_style?: string
+          contact_layout?: string
+          contact_map_position?: string
+          footer_align?: string
+          footer_columns?: number
+          footer_show_headman?: boolean
+          footer_show_quicklinks?: boolean
+          footer_show_social?: boolean
           hero_aspect_ratio?: string
           hero_autoplay?: boolean
           hero_autoplay_delay?: number
@@ -601,6 +658,15 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          about_align?: string
+          about_hero_style?: string
+          contact_layout?: string
+          contact_map_position?: string
+          footer_align?: string
+          footer_columns?: number
+          footer_show_headman?: boolean
+          footer_show_quicklinks?: boolean
+          footer_show_social?: boolean
           hero_aspect_ratio?: string
           hero_autoplay?: boolean
           hero_autoplay_delay?: number
