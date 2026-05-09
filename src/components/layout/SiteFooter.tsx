@@ -3,7 +3,7 @@ import { MapPin, Phone, Mail, Facebook, MessageCircle } from "lucide-react";
 import { SITE_INFO } from "@/config/site";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { useVillageInfo } from "@/hooks/use-village-info";
-import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 const FOOTER_KEYS = ["footer-about", "contact-info"];
 
@@ -12,15 +12,22 @@ export const SiteFooter = () => {
   const { settings } = useSiteSettings();
   const { data: vi } = useVillageInfo(FOOTER_KEYS);
   const aboutText = vi["footer-about"]?.content?.trim();
-  const contactInfo = vi["contact-info"]?.content?.trim();
+
+  const colsClass: Record<number, string> = {
+    1: "md:grid-cols-1 lg:grid-cols-1",
+    2: "md:grid-cols-2 lg:grid-cols-2",
+    3: "md:grid-cols-2 lg:grid-cols-3",
+    4: "md:grid-cols-2 lg:grid-cols-4",
+  };
+  const alignClass = settings.footerAlign === "center" ? "text-center items-center" : "";
 
   return (
     <footer className="bg-primary-deep text-primary-foreground mt-16 ribbon-gold">
-      <div className="container py-12 lg:py-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+      <div className={cn("container py-12 lg:py-16", settings.footerAlign === "center" && "text-center")}>
+        <div className={cn("grid gap-10", colsClass[settings.footerColumns])}>
           {/* Column 1: ข้อมูลหมู่บ้าน */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
+          <div className={cn(settings.footerColumns === 4 && "lg:col-span-2", alignClass)}>
+            <div className={cn("flex items-center gap-3 mb-4", settings.footerAlign === "center" && "justify-center")}>
               {settings.logoUrl ? (
                 <img src={settings.logoUrl} alt={settings.siteName} className="h-12 w-12 rounded-full object-cover bg-primary-foreground shadow-gold" />
               ) : (
@@ -39,16 +46,16 @@ export const SiteFooter = () => {
             </div>
             {aboutText ? (
               <div
-                className="text-sm text-primary-foreground/80 leading-relaxed mb-4 max-w-md prose-footer"
+                className={cn("text-sm text-primary-foreground/80 leading-relaxed mb-4 max-w-md prose-footer", settings.footerAlign === "center" && "mx-auto")}
                 dangerouslySetInnerHTML={{ __html: aboutText }}
               />
             ) : (
-              <p className="text-sm text-primary-foreground/80 leading-relaxed mb-4 max-w-md">
+              <p className={cn("text-sm text-primary-foreground/80 leading-relaxed mb-4 max-w-md", settings.footerAlign === "center" && "mx-auto")}>
                 {SITE_INFO.description}
               </p>
             )}
             <div className="space-y-2 text-sm">
-              <div className="flex items-start gap-2">
+              <div className={cn("flex items-start gap-2", settings.footerAlign === "center" && "justify-center")}>
                 <MapPin className="h-4 w-4 mt-0.5 text-accent shrink-0" />
                 <span className="text-primary-foreground/85">
                   {SITE_INFO.fullAddress}
@@ -56,7 +63,7 @@ export const SiteFooter = () => {
               </div>
               <a
                 href={`tel:${SITE_INFO.headman.phoneRaw}`}
-                className="flex items-center gap-2 hover:text-accent transition-base"
+                className={cn("flex items-center gap-2 hover:text-accent transition-base", settings.footerAlign === "center" && "justify-center")}
               >
                 <Phone className="h-4 w-4 text-accent shrink-0" />
                 <span>{SITE_INFO.headman.phone}</span>
@@ -65,7 +72,8 @@ export const SiteFooter = () => {
           </div>
 
           {/* Column 2: ผู้ใหญ่บ้าน */}
-          <div>
+          {settings.footerShowHeadman && (
+          <div className={alignClass}>
             <h4 className="font-display font-semibold text-accent mb-4 text-sm uppercase tracking-wider">
               ผู้ใหญ่บ้าน
             </h4>
@@ -86,9 +94,11 @@ export const SiteFooter = () => {
               </a>
             </div>
           </div>
+          )}
 
           {/* Column 3: ลิงก์ด่วน */}
-          <div>
+          {settings.footerShowQuickLinks && (
+          <div className={alignClass}>
             <h4 className="font-display font-semibold text-accent mb-4 text-sm uppercase tracking-wider">
               ลิงก์ด่วน
             </h4>
@@ -112,9 +122,11 @@ export const SiteFooter = () => {
               ))}
             </ul>
           </div>
+          )}
         </div>
 
         {/* Social */}
+        {settings.footerShowSocial ? (
         <div className="mt-10 pt-8 border-t border-primary-foreground/15 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-xs text-primary-foreground/70">
@@ -146,6 +158,13 @@ export const SiteFooter = () => {
             © {year} {settings.siteName}. สงวนลิขสิทธิ์.
           </p>
         </div>
+        ) : (
+        <div className="mt-10 pt-8 border-t border-primary-foreground/15">
+          <p className="text-xs text-primary-foreground/60 text-center">
+            © {year} {settings.siteName}. สงวนลิขสิทธิ์.
+          </p>
+        </div>
+        )}
       </div>
     </footer>
   );
