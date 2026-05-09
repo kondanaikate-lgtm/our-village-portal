@@ -68,6 +68,15 @@ interface SiteSettingsRow {
   hero_respect_reduced_motion: boolean;
   hero_height_aspect: boolean;
   hero_aspect_ratio: string;
+  footer_columns: number;
+  footer_align: "left" | "center";
+  footer_show_quicklinks: boolean;
+  footer_show_headman: boolean;
+  footer_show_social: boolean;
+  contact_layout: "two-column" | "stacked";
+  contact_map_position: "right" | "below";
+  about_align: "left" | "center";
+  about_hero_style: "gradient" | "minimal";
 }
 
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
@@ -96,6 +105,15 @@ const SettingsAdmin = () => {
     hero_respect_reduced_motion: true,
     hero_height_aspect: false,
     hero_aspect_ratio: "16/9",
+    footer_columns: 4,
+    footer_align: "left",
+    footer_show_quicklinks: true,
+    footer_show_headman: true,
+    footer_show_social: true,
+    contact_layout: "two-column",
+    contact_map_position: "right",
+    about_align: "left",
+    about_hero_style: "gradient",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -108,7 +126,9 @@ const SettingsAdmin = () => {
       supabase.from("village_info").select("id,section_key,title,content"),
       supabase.from("social_links").select("*").order("order_index", { ascending: true }),
       (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit,hero_autoplay_start,hero_autoplay_end,hero_respect_reduced_motion,hero_height_aspect,hero_aspect_ratio").eq("key", "main").maybeSingle(),
+      // also fetch layout columns in same row
     ]);
+    const settingsResult2 = await (supabase as any).from("site_settings").select("footer_columns,footer_align,footer_show_quicklinks,footer_show_headman,footer_show_social,contact_layout,contact_map_position,about_align,about_hero_style").eq("key", "main").maybeSingle();
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
 
@@ -126,6 +146,7 @@ const SettingsAdmin = () => {
     setSocials((socialResult.data ?? []) as SocialRow[]);
     if (settingsResult.data) {
       const d: any = settingsResult.data;
+      const d2: any = settingsResult2?.data ?? {};
       const trimTime = (t: string | null | undefined) => (t ? String(t).slice(0, 5) : null);
       setSiteSettings({
         site_name: d.site_name ?? "หมู่บ้านแซร์ออ หมู่ที่ 2",
@@ -142,6 +163,15 @@ const SettingsAdmin = () => {
         hero_respect_reduced_motion: d.hero_respect_reduced_motion !== false,
         hero_height_aspect: d.hero_height_aspect === true,
         hero_aspect_ratio: d.hero_aspect_ratio || "16/9",
+        footer_columns: [1, 2, 3, 4].includes(Number(d2.footer_columns)) ? Number(d2.footer_columns) : 4,
+        footer_align: d2.footer_align === "center" ? "center" : "left",
+        footer_show_quicklinks: d2.footer_show_quicklinks !== false,
+        footer_show_headman: d2.footer_show_headman !== false,
+        footer_show_social: d2.footer_show_social !== false,
+        contact_layout: d2.contact_layout === "stacked" ? "stacked" : "two-column",
+        contact_map_position: d2.contact_map_position === "below" ? "below" : "right",
+        about_align: d2.about_align === "center" ? "center" : "left",
+        about_hero_style: d2.about_hero_style === "minimal" ? "minimal" : "gradient",
       });
     }
     setLoading(false);
@@ -208,6 +238,15 @@ const SettingsAdmin = () => {
       hero_respect_reduced_motion: siteSettings.hero_respect_reduced_motion,
       hero_height_aspect: siteSettings.hero_height_aspect,
       hero_aspect_ratio: siteSettings.hero_aspect_ratio || "16/9",
+      footer_columns: siteSettings.footer_columns,
+      footer_align: siteSettings.footer_align,
+      footer_show_quicklinks: siteSettings.footer_show_quicklinks,
+      footer_show_headman: siteSettings.footer_show_headman,
+      footer_show_social: siteSettings.footer_show_social,
+      contact_layout: siteSettings.contact_layout,
+      contact_map_position: siteSettings.contact_map_position,
+      about_align: siteSettings.about_align,
+      about_hero_style: siteSettings.about_hero_style,
       updated_by: user?.id ?? null,
     });
     setSavingSettings(false);
