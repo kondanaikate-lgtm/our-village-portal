@@ -22,6 +22,16 @@ export interface SiteSettings {
   heroRespectReducedMotion: boolean;
   heroHeightAspect: boolean;
   heroAspectRatio: string; // e.g. "16/9", "4/3", "21/9", "1/1"
+  // Layout customization
+  footerColumns: 1 | 2 | 3 | 4;
+  footerAlign: "left" | "center";
+  footerShowQuickLinks: boolean;
+  footerShowHeadman: boolean;
+  footerShowSocial: boolean;
+  contactLayout: "two-column" | "stacked";
+  contactMapPosition: "right" | "below";
+  aboutAlign: "left" | "center";
+  aboutHeroStyle: "gradient" | "minimal";
 }
 
 export const defaultSiteSettings: SiteSettings = {
@@ -39,6 +49,15 @@ export const defaultSiteSettings: SiteSettings = {
   heroRespectReducedMotion: true,
   heroHeightAspect: false,
   heroAspectRatio: "16/9",
+  footerColumns: 4,
+  footerAlign: "left",
+  footerShowQuickLinks: true,
+  footerShowHeadman: true,
+  footerShowSocial: true,
+  contactLayout: "two-column",
+  contactMapPosition: "right",
+  aboutAlign: "left",
+  aboutHeroStyle: "gradient",
 };
 
 export const useSiteSettings = () => {
@@ -49,7 +68,7 @@ export const useSiteSettings = () => {
     setLoading(true);
     const { data } = await (supabase as any)
       .from("site_settings")
-      .select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit,hero_autoplay_start,hero_autoplay_end,hero_respect_reduced_motion,hero_height_aspect,hero_aspect_ratio")
+      .select("*")
       .eq("key", "main")
       .maybeSingle();
 
@@ -70,6 +89,15 @@ export const useSiteSettings = () => {
         heroRespectReducedMotion: data.hero_respect_reduced_motion !== false,
         heroHeightAspect: data.hero_height_aspect === true,
         heroAspectRatio: data.hero_aspect_ratio || "16/9",
+        footerColumns: ([1, 2, 3, 4].includes(Number(data.footer_columns)) ? Number(data.footer_columns) : 4) as 1 | 2 | 3 | 4,
+        footerAlign: data.footer_align === "center" ? "center" : "left",
+        footerShowQuickLinks: data.footer_show_quicklinks !== false,
+        footerShowHeadman: data.footer_show_headman !== false,
+        footerShowSocial: data.footer_show_social !== false,
+        contactLayout: data.contact_layout === "stacked" ? "stacked" : "two-column",
+        contactMapPosition: data.contact_map_position === "below" ? "below" : "right",
+        aboutAlign: data.about_align === "center" ? "center" : "left",
+        aboutHeroStyle: data.about_hero_style === "minimal" ? "minimal" : "gradient",
       });
     }
     setLoading(false);

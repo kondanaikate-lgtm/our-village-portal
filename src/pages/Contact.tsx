@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_INFO } from "@/config/site";
 import { useVillageInfo } from "@/hooks/use-village-info";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { cn } from "@/lib/utils";
 
 interface SocialLink {
   id: string;
@@ -25,6 +27,7 @@ const iconFor = (name: string | null, platform: string) => {
 const Contact = () => {
   const [links, setLinks] = useState<SocialLink[]>([]);
   const { data: vi } = useVillageInfo(["contact-info", "contact-hours", "contact-map"]);
+  const { settings } = useSiteSettings();
   const contactInfo = vi["contact-info"]?.content?.trim();
   const contactHours = vi["contact-hours"]?.content?.trim();
   const contactMap = vi["contact-map"]?.content?.trim();
@@ -50,7 +53,12 @@ const Contact = () => {
       </section>
 
       <section className="py-10 md:py-14 bg-background">
-        <div className="container grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+        <div className={cn(
+          "container grid gap-6",
+          settings.contactLayout === "two-column" && settings.contactMapPosition === "right"
+            ? "lg:grid-cols-[1fr_1.2fr]"
+            : "grid-cols-1"
+        )}>
           <div className="space-y-4">
             <Card className="p-6 border-border/60">
               <h2 className="font-display font-semibold text-xl mb-4">ข้อมูลติดต่อ</h2>
