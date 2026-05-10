@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ExternalLink, Image as ImageIcon, Loader2, Pencil, Play, Plus, Save, Settings, Trash2, Upload } from "lucide-react";
+import { ExternalLink, Eye, Image as ImageIcon, Loader2, MapPin, Pencil, Play, Plus, Save, Settings, Trash2, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -556,6 +557,88 @@ const SettingsAdmin = () => {
                 <Button variant="royal" onClick={saveSiteSettings} disabled={savingSettings}>
                   {savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} บันทึกการตั้งค่า
                 </Button>
+              </div>
+            </Card>
+
+            <Card className="p-4 md:p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Eye className="h-4 w-4 text-primary" />
+                <h3 className="font-display font-semibold text-lg">พรีวิวเลย์เอาต์ (อัปเดตทันที)</h3>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                ดูภาพคร่าว ๆ ของ Footer / Contact / About ตามค่าที่กำลังปรับ ก่อนกดบันทึก
+              </p>
+
+              {/* About preview */}
+              <div className="rounded-lg border border-border overflow-hidden">
+                <div className="text-[11px] font-medium px-3 py-1 bg-muted text-muted-foreground">About — Hero</div>
+                <div
+                  className={cn(
+                    "p-6",
+                    siteSettings.about_hero_style === "gradient"
+                      ? "bg-gradient-to-br from-primary/90 to-primary text-primary-foreground"
+                      : "bg-muted/40 text-foreground border-b",
+                    siteSettings.about_align === "center" ? "text-center" : "text-left",
+                  )}
+                >
+                  <h2 className="font-display text-xl font-bold">หัวข้อหน้าเกี่ยวกับ</h2>
+                  <p className="text-sm opacity-90 mt-1">ตัวอย่างคำบรรยายสั้น ๆ ของหน้านี้</p>
+                </div>
+              </div>
+
+              {/* Contact preview */}
+              <div className="rounded-lg border border-border overflow-hidden">
+                <div className="text-[11px] font-medium px-3 py-1 bg-muted text-muted-foreground">Contact</div>
+                <div className={cn(
+                  "p-4 grid gap-3",
+                  siteSettings.contact_layout === "two-column" && siteSettings.contact_map_position === "right"
+                    ? "md:grid-cols-2"
+                    : "grid-cols-1",
+                )}>
+                  <div className="space-y-2 text-sm">
+                    <div className="font-semibold">ข้อมูลติดต่อ</div>
+                    <div className="text-muted-foreground">โทร / อีเมล / ที่อยู่</div>
+                  </div>
+                  <div className="rounded bg-muted h-24 flex items-center justify-center text-muted-foreground text-xs">
+                    <MapPin className="h-4 w-4 mr-1" /> แผนที่ ({siteSettings.contact_map_position === "right" ? "ขวา" : "ด้านล่าง"})
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer preview */}
+              <div className="rounded-lg border border-border overflow-hidden">
+                <div className="text-[11px] font-medium px-3 py-1 bg-muted text-muted-foreground">Footer</div>
+                <div className={cn(
+                  "bg-foreground/95 text-background p-4 grid gap-3",
+                  siteSettings.footer_align === "center" ? "text-center" : "text-left",
+                  siteSettings.footer_columns === 1 && "grid-cols-1",
+                  siteSettings.footer_columns === 2 && "grid-cols-2",
+                  siteSettings.footer_columns === 3 && "grid-cols-3",
+                  siteSettings.footer_columns === 4 && "grid-cols-2 md:grid-cols-4",
+                )}>
+                  <div>
+                    <div className="font-semibold text-sm">เกี่ยวกับ</div>
+                    <div className="text-xs opacity-70 mt-1">ข้อมูลหน่วยงาน</div>
+                  </div>
+                  {siteSettings.footer_show_quicklinks && (
+                    <div>
+                      <div className="font-semibold text-sm">ลิงก์ด่วน</div>
+                      <div className="text-xs opacity-70 mt-1">ข่าวสาร · กิจกรรม</div>
+                    </div>
+                  )}
+                  {siteSettings.footer_show_headman && (
+                    <div>
+                      <div className="font-semibold text-sm">ผู้ใหญ่บ้าน</div>
+                      <div className="text-xs opacity-70 mt-1">ชื่อ-สกุล / ติดต่อ</div>
+                    </div>
+                  )}
+                  {siteSettings.footer_show_social && (
+                    <div>
+                      <div className="font-semibold text-sm">ติดตามเรา</div>
+                      <div className="text-xs opacity-70 mt-1">Facebook · LINE</div>
+                    </div>
+                  )}
+                </div>
               </div>
             </Card>
           </TabsContent>
