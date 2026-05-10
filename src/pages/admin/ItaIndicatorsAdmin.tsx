@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Pencil, Trash2, Save, ShieldCheck } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Save, ShieldCheck, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,8 @@ const ItaIndicatorsAdmin = () => {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<(typeof empty) & { id?: string }>(empty);
   const [saving, setSaving] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -96,6 +98,39 @@ const ItaIndicatorsAdmin = () => {
     load();
   };
 
+  const persistOrder = async (next: Row[]) => {
+    setReordering(true);
+    // assign normalized order_index in steps of 10
+    const updates = next.map((r, i) => ({ id: r.id, order_index: (i + 1) * 10 }));
+    setRows(next.map((r, i) => ({ ...r, order_index: (i + 1) * 10 })));
+    try {
+      // run updates in parallel; small list so this is fine
+      await Promise.all(
+        updates.map((u) =>
+          (supabase as any).from("ita_indicators").update({ order_index: u.order_index }).eq("id", u.id),
+        ),
+      );
+      toast.success("บันทึกลำดับใหม่แล้ว");
+    } catch (e: any) {
+      toast.error(e?.message || "บันทึกลำดับไม่สำเร็จ");
+      load();
+    } finally {
+      setReordering(false);
+    }
+  };
+
+  const onDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId) return;
+    const from = rows.findIndex((r) => r.id === dragId);
+    const to = rows.findIndex((r) => r.id === targetId);
+    if (from < 0 || to < 0) return;
+    const next = [...rows];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    setDragId(null);
+    persistOrder(next);
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-3 flex-wrap">
@@ -103,9 +138,14 @@ const ItaIndicatorsAdmin = () => {
           <h1 className="font-display text-2xl lg:text-3xl font-bold flex items-center gap-2">
             <ShieldCheck className="h-6 w-6 text-primary" /> ตัวชี้วัด ITA / OIT
           </h1>
-          <p className="text-sm text-muted-foreground">จัดการรายการตัวชี้วัดที่แสดงในหน้า /ita</p>
+          <p className="text-sm text-muted-foreground">
+            จัดการรายการตัวชี้วัดที่แสดงในหน้า /ita — ลากที่ไอคอน <GripVertical className="inline h-3 w-3" /> เพื่อจัดลำดับ
+          </p>
         </div>
-        <Button variant="royal" onClick={() => openForm()}><Plus className="h-4 w-4" /> เพิ่มตัวชี้วัด</Button>
+        <div className="flex items-center gap-2">
+          {reordering && <span className="text-xs text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> กำลังบันทึกลำดับ...</span>}
+          <Button variant="royal" onClick={() => openForm()}><Plus className="h-4 w-4" /> เพิ่มตัวชี้วัด</Button>
+        </div>
       </div>
 
       <Card className="overflow-hidden">
@@ -117,6 +157,7 @@ const ItaIndicatorsAdmin = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-8"></TableHead>
                 <TableHead className="w-20">รหัส</TableHead>
                 <TableHead>ชื่อตัวชี้วัด</TableHead>
                 <TableHead className="hidden md:table-cell">รายละเอียด</TableHead>
@@ -127,9 +168,26 @@ const ItaIndicatorsAdmin = () => {
             </TableHeader>
             <TableBody>
               {rows.length === 0 ? (
-                <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">ยังไม่มีตัวชี้วัด</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">ยังไม่มีตัวชี้วัด</TableCell></TableRow>
               ) : rows.map((r) => (
-                <TableRow key={r.id}>
+                <TableRow
+                  key={r.id}
+                  onDragOver={(e) => { e.preventDefault(); }}
+                  onDrop={() => onDrop(r.id)}
+                  className={dragId === r.id ? "opacity-50" : ""}
+                >
+                  <TableCell>
+                    <button
+                      type="button"
+                      draggable
+                      onDragStart={() => setDragId(r.id)}
+                      onDragEnd={() => setDragId(null)}
+                      className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                      aria-label="ลากเพื่อจัดลำดับ"
+                    >
+                      <GripVertical className="h-4 w-4" />
+                    </button>
+                  </TableCell>
                   <TableCell><Badge variant="secondary">{r.code}</Badge></TableCell>
                   <TableCell className="font-medium">
                     {r.title}
