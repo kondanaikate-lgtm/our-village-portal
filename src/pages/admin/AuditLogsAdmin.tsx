@@ -32,6 +32,7 @@ const AuditLogsAdmin = () => {
   const [rows, setRows] = useState<AuditRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [userFilter, setUserFilter] = useState("");
+  const [actionFilter, setActionFilter] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [active, setActive] = useState<AuditRow | null>(null);
@@ -46,6 +47,7 @@ const AuditLogsAdmin = () => {
       .select("*", forCount ? { count: "exact" } : undefined)
       .order("created_at", { ascending: false });
     if (userFilter.trim()) q = q.eq("user_id", userFilter.trim());
+    if (actionFilter.trim()) q = q.ilike("action", `%${actionFilter.trim()}%`);
     if (from) q = q.gte("created_at", new Date(from).toISOString());
     if (to) q = q.lte("created_at", new Date(to + "T23:59:59").toISOString());
     return q;
@@ -143,11 +145,16 @@ const AuditLogsAdmin = () => {
       </div>
 
       <Card className="p-4">
-        <div className="grid gap-3 md:grid-cols-[1fr_auto_auto_auto]">
+        <div className="grid gap-3 md:grid-cols-[1fr_180px_auto_auto_auto]">
           <Input
             placeholder="ค้นหาด้วย User ID (UUID)"
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
+          />
+          <Input
+            placeholder="กรอง action (เช่น insert)"
+            value={actionFilter}
+            onChange={(e) => setActionFilter(e.target.value)}
           />
           <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
@@ -156,6 +163,9 @@ const AuditLogsAdmin = () => {
             กรอง
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          ปุ่ม Export จะดาวน์โหลดเฉพาะรายการที่ตรงกับตัวกรองปัจจุบัน
+        </p>
       </Card>
 
       <Card>
