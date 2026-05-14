@@ -115,18 +115,6 @@ const NewsDetailPage = () => {
     toast.success("คัดลอกลิงก์แล้ว");
   };
 
-  const handleNativeShare = async () => {
-    if (navigator.share && item) {
-      try {
-        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-        return true;
-      } catch {
-        return false;
-      }
-    }
-    return false;
-  };
-
   const ShareMenu = ({
     triggerLabel = "แชร์",
     variant = "outlineGold",
