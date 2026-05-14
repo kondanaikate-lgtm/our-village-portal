@@ -21,6 +21,7 @@ interface NewsDetailRow {
   view_count: number;
   is_pinned: boolean;
   news_categories: { name: string; slug: string } | null;
+  image_urls: string[] | null;
 }
 
 const formatThaiDate = (date: string) => {
@@ -48,7 +49,7 @@ const NewsDetailPage = () => {
       const { data, error } = await supabase
         .from("news")
         .select(
-          "id,title,slug,excerpt,content,thumbnail_url,published_at,created_at,view_count,is_pinned,news_categories(name,slug)",
+          "id,title,slug,excerpt,content,thumbnail_url,published_at,created_at,view_count,is_pinned,image_urls,news_categories(name,slug)",
         )
         .eq("slug", slug)
         .eq("is_published", true)
@@ -192,6 +193,32 @@ const NewsDetailPage = () => {
             className="prose prose-sm sm:prose-base lg:prose-lg max-w-none prose-headings:font-display prose-headings:text-foreground prose-a:text-primary hover:prose-a:text-accent prose-img:rounded-md"
             dangerouslySetInnerHTML={{ __html: item.content }}
           />
+
+          {item.image_urls && item.image_urls.length > 0 && (
+            <section className="mt-10">
+              <h2 className="font-display text-xl md:text-2xl font-bold mb-4 text-foreground">
+                รูปภาพประกอบ
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                {item.image_urls.map((url, idx) => (
+                  <a
+                    key={`${url}-${idx}`}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative aspect-[4/3] overflow-hidden rounded-md border border-border bg-muted"
+                  >
+                    <img
+                      src={url}
+                      alt={`${item.title} - รูปที่ ${idx + 1}`}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
 
           <div className="mt-12 pt-8 border-t border-border flex justify-between items-center gap-4 flex-wrap">
             <Button asChild variant="outline">
