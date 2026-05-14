@@ -54,6 +54,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
 type BannerType = "banner" | "popup";
+type DisplaySize = "sm" | "md" | "lg" | "xl" | "full";
 
 interface BannerRow {
   id: string;
@@ -66,6 +67,7 @@ interface BannerRow {
   start_at: string | null;
   end_at: string | null;
   created_at: string;
+  display_size: DisplaySize;
 }
 
 interface FormState {
@@ -78,6 +80,7 @@ interface FormState {
   order_index: number;
   start_at: string; // datetime-local string
   end_at: string;
+  display_size: DisplaySize;
 }
 
 const emptyForm: FormState = {
@@ -89,6 +92,7 @@ const emptyForm: FormState = {
   order_index: 0,
   start_at: "",
   end_at: "",
+  display_size: "md",
 };
 
 // Convert ISO -> "YYYY-MM-DDTHH:mm" for <input type="datetime-local">
@@ -140,7 +144,7 @@ const BannersAdmin = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("banners")
-      .select("id,type,title,image_url,link_url,is_active,order_index,start_at,end_at,created_at")
+      .select("id,type,title,image_url,link_url,is_active,order_index,start_at,end_at,created_at,display_size")
       .order("order_index", { ascending: true })
       .order("created_at", { ascending: false });
     if (error) toast.error("โหลดข้อมูลไม่สำเร็จ: " + error.message);
@@ -174,6 +178,7 @@ const BannersAdmin = () => {
       order_index: row.order_index,
       start_at: isoToLocalInput(row.start_at),
       end_at: isoToLocalInput(row.end_at),
+      display_size: row.display_size ?? "md",
     });
     setDialogOpen(true);
   };
@@ -217,6 +222,7 @@ const BannersAdmin = () => {
       order_index: Number.isFinite(form.order_index) ? form.order_index : 0,
       start_at: startIso,
       end_at: endIso,
+      display_size: form.display_size,
     };
 
     const { error } = form.id
