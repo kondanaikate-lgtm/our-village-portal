@@ -1,0 +1,1 @@
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS display_size text NOT NULL DEFAULT 'md';
