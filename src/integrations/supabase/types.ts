@@ -50,6 +50,7 @@ export type Database = {
       banners: {
         Row: {
           created_at: string
+          display_size: string
           end_at: string | null
           id: string
           image_url: string
@@ -63,6 +64,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          display_size?: string
           end_at?: string | null
           id?: string
           image_url: string
@@ -76,6 +78,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          display_size?: string
           end_at?: string | null
           id?: string
           image_url?: string
