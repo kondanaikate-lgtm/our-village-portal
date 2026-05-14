@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 interface PopupBanner {
   id: string;
   title: string | null;
   image_url: string;
   link_url: string | null;
+  display_size: "sm" | "md" | "lg" | "xl" | "full";
 }
 
 const STORAGE_KEY = "dismissed-popup-banner-id";
@@ -20,7 +22,7 @@ export const BannerPopup = () => {
       const nowIso = new Date().toISOString();
       const { data } = await supabase
         .from("banners")
-        .select("id,title,image_url,link_url,start_at,end_at,is_active,type")
+        .select("id,title,image_url,link_url,start_at,end_at,is_active,type,display_size")
         .eq("type", "popup")
         .eq("is_active", true)
         .order("order_index", { ascending: true });
@@ -48,6 +50,15 @@ export const BannerPopup = () => {
 
   if (!popup) return null;
 
+  const sizeClass =
+    {
+      sm: "max-w-sm",
+      md: "max-w-lg",
+      lg: "max-w-2xl",
+      xl: "max-w-4xl",
+      full: "max-w-6xl",
+    }[popup.display_size ?? "md"];
+
   const Img = (
     <img
       src={popup.image_url}
@@ -58,7 +69,7 @@ export const BannerPopup = () => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg p-3">
+      <DialogContent className={cn("p-3 w-[95vw]", sizeClass)}>
         <DialogTitle className="sr-only">{popup.title ?? "ประกาศ"}</DialogTitle>
         <DialogDescription className="sr-only">
           ประกาศจากหมู่บ้าน
