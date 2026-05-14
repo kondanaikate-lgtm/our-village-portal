@@ -1,10 +1,26 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Calendar, Eye, Newspaper, Pin, Share2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Eye,
+  Facebook,
+  Link as LinkIcon,
+  Newspaper,
+  Pin,
+  Share2,
+  Twitter,
+} from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -79,19 +95,86 @@ const NewsDetailPage = () => {
     load();
   }, [slug]);
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share && item) {
-      try {
-        await navigator.share({ title: item.title, url });
-        return;
-      } catch {
-        // user canceled
-      }
-    }
-    await navigator.clipboard.writeText(url);
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const shareTitle = item?.title ?? "";
+
+  const openShare = (target: "facebook" | "line" | "twitter") => {
+    const u = encodeURIComponent(shareUrl);
+    const t = encodeURIComponent(shareTitle);
+    const map = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
+      line: `https://social-plugins.line.me/lineit/share?url=${u}&text=${t}`,
+      twitter: `https://twitter.com/intent/tweet?url=${u}&text=${t}`,
+    } as const;
+    window.open(map[target], "_blank", "noopener,noreferrer,width=600,height=600");
+  };
+
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(shareUrl);
     toast.success("คัดลอกลิงก์แล้ว");
   };
+
+  const ShareMenu = ({
+    triggerLabel = "แชร์",
+    variant = "outlineGold",
+    size = "sm",
+  }: {
+    triggerLabel?: string;
+    variant?: "outlineGold" | "gold";
+    size?: "sm" | "default";
+  }) => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          size={size}
+          variant={variant}
+          className={size === "sm" ? "h-8" : ""}
+        >
+          <Share2 className={size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4"} />{" "}
+          {triggerLabel}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-56 p-2">
+        <div className="grid gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="justify-start"
+            onClick={() => openShare("facebook")}
+          >
+            <Facebook className="h-4 w-4 mr-2" /> Facebook
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="justify-start"
+            onClick={() => openShare("line")}
+          >
+            <span className="inline-flex h-4 w-4 mr-2 items-center justify-center rounded-sm bg-[#06C755] text-[10px] font-bold text-white">
+              L
+            </span>
+            LINE
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="justify-start"
+            onClick={() => openShare("twitter")}
+          >
+            <Twitter className="h-4 w-4 mr-2" /> X / Twitter
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="justify-start"
+            onClick={copyLink}
+          >
+            <LinkIcon className="h-4 w-4 mr-2" /> คัดลอกลิงก์
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 
   if (loading) {
     return (
@@ -126,6 +209,32 @@ const NewsDetailPage = () => {
 
   return (
     <SiteLayout>
+      {item && (
+        <Helmet>
+          <title>{`${item.title} | ข่าวสารหมู่บ้านแซร์ออ`}</title>
+          <meta name="description" content={item.excerpt ?? item.title} />
+          <link rel="canonical" href={shareUrl} />
+          <meta property="og:type" content="article" />
+          <meta property="og:title" content={item.title} />
+          <meta
+            property="og:description"
+            content={item.excerpt ?? item.title}
+          />
+          <meta property="og:url" content={shareUrl} />
+          {item.thumbnail_url && (
+            <meta property="og:image" content={item.thumbnail_url} />
+          )}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={item.title} />
+          <meta
+            name="twitter:description"
+            content={item.excerpt ?? item.title}
+          />
+          {item.thumbnail_url && (
+            <meta name="twitter:image" content={item.thumbnail_url} />
+          )}
+        </Helmet>
+      )}
       <article className="bg-background">
         {/* Hero */}
         <header className="bg-gradient-primary text-primary-foreground py-10 md:py-14 ribbon-gold">
@@ -160,14 +269,9 @@ const NewsDetailPage = () => {
                 <Eye className="h-4 w-4" />
                 {(item.view_count + 1).toLocaleString("th-TH")} ครั้ง
               </span>
-              <Button
-                size="sm"
-                variant="outlineGold"
-                onClick={handleShare}
-                className="ml-auto h-8"
-              >
-                <Share2 className="h-3.5 w-3.5" /> แชร์
-              </Button>
+              <div className="ml-auto">
+                <ShareMenu />
+              </div>
             </div>
           </div>
         </header>
@@ -226,9 +330,7 @@ const NewsDetailPage = () => {
                 <ArrowLeft className="h-4 w-4" /> ดูข่าวอื่นๆ
               </Link>
             </Button>
-            <Button onClick={handleShare} variant="gold">
-              <Share2 className="h-4 w-4" /> แชร์ข่าวนี้
-            </Button>
+            <ShareMenu triggerLabel="แชร์ข่าวนี้" variant="gold" size="default" />
           </div>
         </div>
       </article>
