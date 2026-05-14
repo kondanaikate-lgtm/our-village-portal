@@ -97,7 +97,6 @@ const NewsDetailPage = () => {
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const shareTitle = item?.title ?? "";
-  const shareText = item?.excerpt ?? item?.title ?? "";
 
   const openShare = (target: "facebook" | "line" | "twitter") => {
     const u = encodeURIComponent(shareUrl);
