@@ -142,17 +142,6 @@ const NewsDetailPage = () => {
           size={size}
           variant={variant}
           className={size === "sm" ? "h-8" : ""}
-          onClick={async (e) => {
-            // Prefer native share on mobile if available; fall back to popover menu
-            if (navigator.share) {
-              e.preventDefault();
-              const ok = await handleNativeShare();
-              if (!ok) {
-                // open popover manually by simulating click on next paint
-                (e.currentTarget as HTMLButtonElement).click();
-              }
-            }
-          }}
         >
           <Share2 className={size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4"} />{" "}
           {triggerLabel}
