@@ -453,6 +453,26 @@ const BannersAdmin = () => {
             </div>
 
             <div className="space-y-1.5">
+              <Label>ขนาดการแสดงผล</Label>
+              <Select
+                value={form.display_size}
+                onValueChange={(v) => setForm((f) => ({ ...f, display_size: v as DisplaySize }))}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sm">เล็ก (~400px)</SelectItem>
+                  <SelectItem value="md">กลาง (~520px)</SelectItem>
+                  <SelectItem value="lg">ใหญ่ (~720px)</SelectItem>
+                  <SelectItem value="xl">ใหญ่พิเศษ (~960px)</SelectItem>
+                  <SelectItem value="full">เต็มจอ (~1200px)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                ใช้สำหรับกำหนดความกว้างของป๊อปอัป และความกว้างสูงสุดของแบนเนอร์ภาพ-อย่างเดียว
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
               <Label htmlFor="b-title">ชื่อ / Alt text</Label>
               <Input
                 id="b-title"
