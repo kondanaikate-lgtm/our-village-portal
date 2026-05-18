@@ -78,6 +78,7 @@ interface SiteSettingsRow {
   contact_map_position: "right" | "below";
   about_align: "left" | "center";
   about_hero_style: "gradient" | "minimal";
+  personnel_image_shape: "square" | "rounded" | "circle";
 }
 
 const emptySocial = { platform: "", label: "", url: "", icon_name: "", is_active: true, order_index: 0 };
@@ -115,6 +116,7 @@ const SettingsAdmin = () => {
     contact_map_position: "right",
     about_align: "left",
     about_hero_style: "gradient",
+    personnel_image_shape: "circle",
   });
   const [savingSettings, setSavingSettings] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -129,7 +131,7 @@ const SettingsAdmin = () => {
       (supabase as any).from("site_settings").select("site_name,logo_url,hero_display_mode,hero_layout,hero_height,hero_autoplay,hero_autoplay_delay,hero_show_cta,hero_image_fit,hero_autoplay_start,hero_autoplay_end,hero_respect_reduced_motion,hero_height_aspect,hero_aspect_ratio").eq("key", "main").maybeSingle(),
       // also fetch layout columns in same row
     ]);
-    const settingsResult2 = await (supabase as any).from("site_settings").select("footer_columns,footer_align,footer_show_quicklinks,footer_show_headman,footer_show_social,contact_layout,contact_map_position,about_align,about_hero_style").eq("key", "main").maybeSingle();
+    const settingsResult2 = await (supabase as any).from("site_settings").select("footer_columns,footer_align,footer_show_quicklinks,footer_show_headman,footer_show_social,contact_layout,contact_map_position,about_align,about_hero_style,personnel_image_shape").eq("key", "main").maybeSingle();
     if (infoResult.error) toast.error(infoResult.error.message);
     if (socialResult.error) toast.error(socialResult.error.message);
 
@@ -173,6 +175,12 @@ const SettingsAdmin = () => {
         contact_map_position: d2.contact_map_position === "below" ? "below" : "right",
         about_align: d2.about_align === "center" ? "center" : "left",
         about_hero_style: d2.about_hero_style === "minimal" ? "minimal" : "gradient",
+        personnel_image_shape:
+          d2.personnel_image_shape === "square"
+            ? "square"
+            : d2.personnel_image_shape === "rounded"
+              ? "rounded"
+              : "circle",
       });
     }
     setLoading(false);
@@ -248,6 +256,7 @@ const SettingsAdmin = () => {
       contact_map_position: siteSettings.contact_map_position,
       about_align: siteSettings.about_align,
       about_hero_style: siteSettings.about_hero_style,
+      personnel_image_shape: siteSettings.personnel_image_shape,
       updated_by: user?.id ?? null,
     });
     setSavingSettings(false);
@@ -549,6 +558,31 @@ const SettingsAdmin = () => {
                         <SelectItem value="minimal">มินิมอล (โทนอ่อน)</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h3 className="font-display font-semibold text-lg mb-3">หน้าทำเนียบบุคลากร</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>รูปทรงรูปภาพบุคลากร</Label>
+                    <Select
+                      value={siteSettings.personnel_image_shape}
+                      onValueChange={(v) =>
+                        setSiteSettings((s) => ({ ...s, personnel_image_shape: v as "square" | "rounded" | "circle" }))
+                      }
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="circle">วงกลม (Circle)</SelectItem>
+                        <SelectItem value="rounded">มุมโค้ง (Rounded)</SelectItem>
+                        <SelectItem value="square">สี่เหลี่ยม (Square)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      ใช้กับการ์ดบุคลากรในหน้า "ทำเนียบบุคลากร" และส่วนหน้าแรก
+                    </p>
                   </div>
                 </div>
               </div>

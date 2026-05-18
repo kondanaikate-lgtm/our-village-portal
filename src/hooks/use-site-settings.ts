@@ -6,6 +6,7 @@ export type HeroDisplayMode = "single" | "carousel";
 export type HeroLayout = "overlay" | "image-only";
 export type HeroHeight = "compact" | "normal" | "tall" | "aspect";
 export type HeroImageFit = "cover" | "contain";
+export type PersonnelImageShape = "square" | "rounded" | "circle";
 
 export interface SiteSettings {
   siteName: string;
@@ -32,6 +33,7 @@ export interface SiteSettings {
   contactMapPosition: "right" | "below";
   aboutAlign: "left" | "center";
   aboutHeroStyle: "gradient" | "minimal";
+  personnelImageShape: PersonnelImageShape;
 }
 
 export const defaultSiteSettings: SiteSettings = {
@@ -58,6 +60,7 @@ export const defaultSiteSettings: SiteSettings = {
   contactMapPosition: "right",
   aboutAlign: "left",
   aboutHeroStyle: "gradient",
+  personnelImageShape: "circle",
 };
 
 export const useSiteSettings = () => {
@@ -98,6 +101,12 @@ export const useSiteSettings = () => {
         contactMapPosition: data.contact_map_position === "below" ? "below" : "right",
         aboutAlign: data.about_align === "center" ? "center" : "left",
         aboutHeroStyle: data.about_hero_style === "minimal" ? "minimal" : "gradient",
+        personnelImageShape:
+          data.personnel_image_shape === "square"
+            ? "square"
+            : data.personnel_image_shape === "rounded"
+              ? "rounded"
+              : "circle",
       });
     }
     setLoading(false);
