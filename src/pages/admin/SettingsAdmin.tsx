@@ -562,6 +562,31 @@ const SettingsAdmin = () => {
                 </div>
               </div>
 
+              <div className="border-t pt-4">
+                <h3 className="font-display font-semibold text-lg mb-3">หน้าทำเนียบบุคลากร</h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>รูปทรงรูปภาพบุคลากร</Label>
+                    <Select
+                      value={siteSettings.personnel_image_shape}
+                      onValueChange={(v) =>
+                        setSiteSettings((s) => ({ ...s, personnel_image_shape: v as "square" | "rounded" | "circle" }))
+                      }
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="circle">วงกลม (Circle)</SelectItem>
+                        <SelectItem value="rounded">มุมโค้ง (Rounded)</SelectItem>
+                        <SelectItem value="square">สี่เหลี่ยม (Square)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      ใช้กับการ์ดบุคลากรในหน้า "ทำเนียบบุคลากร" และส่วนหน้าแรก
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex justify-end">
                 <Button variant="royal" onClick={saveSiteSettings} disabled={savingSettings}>
                   {savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} บันทึกการตั้งค่า
