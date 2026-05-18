@@ -44,6 +44,8 @@ import {
   Trash2,
   Upload,
   User,
+  Building2,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,6 +62,13 @@ interface PersonnelRow {
   is_active: boolean;
   order_index: number;
   created_at: string;
+}
+
+interface DepartmentRow {
+  id: string;
+  name: string;
+  order_index: number;
+  is_active: boolean;
 }
 
 interface FormState {
@@ -90,6 +99,8 @@ const emptyForm: FormState = {
 const PersonnelAdmin = () => {
   const { user } = useAuth();
   const [rows, setRows] = useState<PersonnelRow[]>([]);
+  const [departments, setDepartments] = useState<DepartmentRow[]>([]);
+  const [newDeptName, setNewDeptName] = useState("");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -100,13 +111,21 @@ const PersonnelAdmin = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("personnel")
-      .select("id,name,position,department,phone,email,bio,image_url,is_active,order_index,created_at")
-      .order("order_index", { ascending: true })
-      .order("created_at", { ascending: false });
+    const [{ data, error }, deptRes] = await Promise.all([
+      supabase
+        .from("personnel")
+        .select("id,name,position,department,phone,email,bio,image_url,is_active,order_index,created_at")
+        .order("order_index", { ascending: true })
+        .order("created_at", { ascending: false }),
+      (supabase as any)
+        .from("personnel_departments")
+        .select("id,name,order_index,is_active")
+        .order("order_index", { ascending: true }),
+    ]);
     if (error) toast.error("โหลดข้อมูลไม่สำเร็จ: " + error.message);
+    if (deptRes?.error) toast.error("โหลดแผนกไม่สำเร็จ: " + deptRes.error.message);
     setRows(data ?? []);
+    setDepartments((deptRes?.data ?? []) as DepartmentRow[]);
     setLoading(false);
   };
 
@@ -228,6 +247,58 @@ const PersonnelAdmin = () => {
     fetchAll();
   };
 
+  // ───── Departments management ─────
+  const addDepartment = async () => {
+    const name = newDeptName.trim();
+    if (!name) return;
+    const nextOrder = (departments[departments.length - 1]?.order_index ?? 0) + 10;
+    const { error } = await (supabase as any)
+      .from("personnel_departments")
+      .insert({ name, order_index: nextOrder });
+    if (error) return toast.error(error.message);
+    setNewDeptName("");
+    toast.success("เพิ่มแผนกแล้ว");
+    fetchAll();
+  };
+
+  const renameDepartment = async (row: DepartmentRow) => {
+    const next = window.prompt("เปลี่ยนชื่อแผนก", row.name);
+    if (!next || next.trim() === row.name) return;
+    const oldName = row.name;
+    const newName = next.trim();
+    const { error } = await (supabase as any)
+      .from("personnel_departments")
+      .update({ name: newName })
+      .eq("id", row.id);
+    if (error) return toast.error(error.message);
+    // sync personnel rows that referenced the old name
+    await supabase.from("personnel").update({ department: newName }).eq("department", oldName);
+    toast.success("เปลี่ยนชื่อแผนกแล้ว");
+    fetchAll();
+  };
+
+  const deleteDepartment = async (row: DepartmentRow) => {
+    if (!window.confirm(`ลบแผนก "${row.name}"? บุคลากรในแผนกนี้จะไม่ถูกลบ แต่จะไม่มีแผนกกำกับ`)) return;
+    const { error } = await (supabase as any)
+      .from("personnel_departments")
+      .delete()
+      .eq("id", row.id);
+    if (error) return toast.error(error.message);
+    await supabase.from("personnel").update({ department: null }).eq("department", row.name);
+    toast.success("ลบแผนกแล้ว");
+    fetchAll();
+  };
+
+  const moveDepartment = async (row: DepartmentRow, direction: "up" | "down") => {
+    const sorted = [...departments].sort((a, b) => a.order_index - b.order_index);
+    const idx = sorted.findIndex((d) => d.id === row.id);
+    const swap = direction === "up" ? sorted[idx - 1] : sorted[idx + 1];
+    if (!swap) return;
+    await (supabase as any).from("personnel_departments").update({ order_index: swap.order_index }).eq("id", row.id);
+    await (supabase as any).from("personnel_departments").update({ order_index: row.order_index }).eq("id", swap.id);
+    fetchAll();
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -251,6 +322,62 @@ const PersonnelAdmin = () => {
             className="pl-9"
           />
         </div>
+      </div>
+
+      {/* Departments manager */}
+      <div className="rounded-lg border border-border bg-background p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Building2 className="h-4 w-4 text-primary" />
+          <h2 className="font-semibold text-foreground">จัดการแผนก / ฝ่าย</h2>
+          <span className="text-xs text-muted-foreground">ใช้กำหนดลำดับการแสดงผลในหน้าทำเนียบ</span>
+        </div>
+        <div className="flex gap-2">
+          <Input
+            placeholder="ชื่อแผนกใหม่ เช่น ฝ่ายบริหาร"
+            value={newDeptName}
+            onChange={(e) => setNewDeptName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addDepartment();
+              }
+            }}
+            className="max-w-sm"
+          />
+          <Button variant="outline" onClick={addDepartment}>
+            <Plus className="h-4 w-4" /> เพิ่มแผนก
+          </Button>
+        </div>
+        {departments.length === 0 ? (
+          <p className="text-sm text-muted-foreground">ยังไม่มีแผนก — เพิ่มเพื่อจัดเรียงลำดับการแสดงผล</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-md border border-border overflow-hidden">
+            {departments.map((d, i) => {
+              const count = rows.filter((r) => r.department === d.name).length;
+              return (
+                <li key={d.id} className="flex items-center gap-2 p-2 bg-background">
+                  <span className="text-xs tabular-nums w-6 text-center text-muted-foreground">{i + 1}</span>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-foreground">{d.name}</div>
+                    <div className="text-xs text-muted-foreground">{count} คน</div>
+                  </div>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveDepartment(d, "up")} disabled={i === 0}>
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => moveDepartment(d, "down")} disabled={i === departments.length - 1}>
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => renameDepartment(d)} title="แก้ไขชื่อ">
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => deleteDepartment(d)} title="ลบ">
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       <div className="rounded-lg border border-border bg-background overflow-hidden">
@@ -405,10 +532,16 @@ const PersonnelAdmin = () => {
                 <Label htmlFor="p-dept">แผนก/ฝ่าย</Label>
                 <Input
                   id="p-dept"
+                  list="personnel-dept-list"
                   value={form.department}
                   onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}
-                  placeholder="เช่น ฝ่ายบริหาร"
+                  placeholder="เลือกหรือพิมพ์ใหม่ เช่น ฝ่ายบริหาร"
                 />
+                <datalist id="personnel-dept-list">
+                  {departments.map((d) => (
+                    <option key={d.id} value={d.name} />
+                  ))}
+                </datalist>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="p-order">ลำดับการแสดง</Label>
