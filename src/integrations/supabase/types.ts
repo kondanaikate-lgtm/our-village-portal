@@ -576,6 +576,33 @@ export type Database = {
         }
         Relationships: []
       }
+      personnel_departments: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          order_index?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -628,6 +655,7 @@ export type Database = {
           hero_show_cta: boolean
           key: string
           logo_url: string | null
+          personnel_image_shape: string
           site_name: string
           updated_at: string
           updated_by: string | null
@@ -656,6 +684,7 @@ export type Database = {
           hero_show_cta?: boolean
           key?: string
           logo_url?: string | null
+          personnel_image_shape?: string
           site_name?: string
           updated_at?: string
           updated_by?: string | null
@@ -684,6 +713,7 @@ export type Database = {
           hero_show_cta?: boolean
           key?: string
           logo_url?: string | null
+          personnel_image_shape?: string
           site_name?: string
           updated_at?: string
           updated_by?: string | null
