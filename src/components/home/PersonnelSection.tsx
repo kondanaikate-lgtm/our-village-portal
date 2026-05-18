@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { cn } from "@/lib/utils";
 
 interface Person {
   id: string;
@@ -17,6 +19,7 @@ interface Person {
 }
 
 export const PersonnelSection = () => {
+  const { settings } = useSiteSettings();
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +61,16 @@ export const PersonnelSection = () => {
                 key={p.id}
                 className="overflow-hidden text-center hover:shadow-elegant transition-smooth border-border/60 group"
               >
-                <div className="relative aspect-square bg-gradient-primary overflow-hidden">
+                <div
+                  className={cn(
+                    "relative bg-gradient-primary overflow-hidden",
+                    settings.personnelImageShape === "circle"
+                      ? "aspect-square mx-auto mt-5 w-32 sm:w-36 rounded-full ring-4 ring-background shadow-md"
+                      : settings.personnelImageShape === "rounded"
+                        ? "aspect-square m-4 rounded-2xl"
+                        : "aspect-square",
+                  )}
+                >
                   {p.image_url ? (
                     <img
                       src={p.image_url}
@@ -71,7 +83,7 @@ export const PersonnelSection = () => {
                       <User className="h-20 w-20 text-accent/50" />
                     </div>
                   )}
-                  {i === 0 && (
+                  {i === 0 && settings.personnelImageShape !== "circle" && (
                     <div className="absolute top-3 left-3 bg-gradient-gold px-3 py-1 rounded-full text-xs font-semibold text-accent-foreground shadow-md">
                       ผู้ใหญ่บ้าน
                     </div>
